@@ -1,15 +1,17 @@
 /** Verify a signed XPI using Firefox's own signature checks in a fresh profile.
- * Usage: node tools/verify-firefox-signature.mjs /path/to/addon.xpi
+ * Usage: node tools/verify-firefox-signature.mjs /path/to/addon.xpi [expected-version]
  * Optional FIREFOX_BINARY and GECKODRIVER environment variables.
  */
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Builder } from 'selenium-webdriver';
 import firefox from 'selenium-webdriver/firefox.js';
 
 assert(process.argv[2], 'Provide the signed XPI path');
 const xpi = resolve(process.argv[2]);
+const expectedVersion = process.argv[3]
+  ?? JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const addonId = 'markmind@zeya-labs.github.io';
 const output = resolve('test-results');
 await mkdir(output, { recursive: true });
@@ -42,7 +44,7 @@ async function inspect() {
   assert(result, 'Extension is missing');
   assert.equal(result.error, undefined);
   assert.equal(result.id, addonId);
-  assert.equal(result.version, '2.1.0');
+  assert.equal(result.version, expectedVersion);
   assert.equal(result.signaturesRequired, true);
   assert.equal(result.signedState, result.expectedSignedState, 'Firefox must report SIGNEDSTATE_SIGNED');
   assert.equal(result.temporarilyInstalled, false);

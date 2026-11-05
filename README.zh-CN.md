@@ -6,13 +6,13 @@
 
 这是 [migsilva89/MarkMind](https://github.com/migsilva89/MarkMind) 的分支，增加 Firefox 构建和中英文界面。原版 MarkMind 及其设计由 [migsilva89](https://github.com/migsilva89) 开发。
 
-## 2.2.0 预发布版：DeepSeek 与可跳过配置
+## 2.2.0：DeepSeek 与可跳过配置
 
 - 内置 DeepSeek 服务商，作为新用户首次引导的默认选项。模型列表和输出上限从当前 API 动态获取，不在扩展中固定一份模型名单。
 - 首次引导可以连接 DeepSeek API 密钥，也可以选择其他服务商。
 - 点击“暂时跳过”可先进入应用，无需立刻填写密钥；开始 AI 分析前，再到设置中配置服务商和模型。
 - 保留已有的有效服务商及模型选择。
-- Chromium / Edge 构建可直接加载。Firefox 2.2.0 ZIP 为**未签名预发布版**，等待新的 Mozilla 签名。旧版 Firefox 2.1.0 签名稳定版仍可下载，但不含 DeepSeek 和新版可跳过配置。
+- Firefox 2.2.0 已提供经过 Mozilla 签名的 XPI，Chromium / Edge 构建可直接加载。未签名 Firefox ZIP 仍保留，供开发与临时加载使用。
 
 ## 2.1.0 的主要变化
 
@@ -27,33 +27,35 @@
 
 | 浏览器 | 构建目录 | 安装方式 |
 | --- | --- | --- |
-| Firefox 桌面版 140 及以上，2.2.0 预发布版 | 未签名 ZIP / dist/firefox | 等待新签名期间，使用临时加载 |
+| Firefox 桌面版 140 及以上，2.2.0 | Releases 中的签名 XPI | 推荐：从文件安装，重启后保留 |
 | Firefox 桌面版 140 及以上，旧版 2.1.0 稳定版 | Releases 中的签名 XPI | 从文件安装，重启后保留；不含 2.2.0 新功能 |
 | Chrome / Chromium / Edge | dist/chromium | 开发者模式，加载已解压扩展 |
 
 Firefox 仍同时支持 Manifest V2 与 Manifest V3。本分支选择持久化后台页，是为了让长时间 AI 请求在关闭弹窗后保持运行。参见 [Mozilla 的扩展平台说明](https://blog.mozilla.org/en/firefox/firefox-manifest-v3-adblockers/)及[后台清单字段文档](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background)。
 
-**Firefox 2.2.0 尚未签名。经过 Mozilla 签名的 XPI 是旧版 2.1.0 稳定版，通过 GitHub 自行分发，尚未在 Mozilla Add-ons（AMO）公开上架。** 该签名不能用于 2.2.0。原项目的 Chrome 应用商店页面属于上游项目，不包含本分支的修改。
+**Firefox 2.2.0 已提供经过 Mozilla 签名的 XPI，通过 GitHub 自行分发，尚未在 Mozilla Add-ons（AMO）公开上架。** 未签名 ZIP 用于开发和临时加载。原项目的 Chrome 应用商店页面属于上游项目，不包含本分支的修改。
 
-### Firefox：安装旧版 2.1.0 签名稳定版
+### Firefox：安装 2.2.0 签名正式版（推荐）
 
-1. 从 [v2.1.0 发布页](https://github.com/zeya-labs/MarkMind/releases/tag/v2.1.0)下载 [markmind-firefox-2.1.0-signed.xpi](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi)，不要解压 XPI。
+1. 从 [v2.2.0 发布页](https://github.com/zeya-labs/MarkMind/releases/tag/v2.2.0)下载 [markmind-firefox-2.2.0-signed.xpi](https://github.com/zeya-labs/MarkMind/releases/download/v2.2.0/markmind-firefox-2.2.0-signed.xpi)，不要解压 XPI。
 2. 在 Firefox 地址栏打开 about:addons。
 3. 点击齿轮菜单，选择“从文件安装附加组件…”。
 4. 选择签名 XPI，查看 Firefox 的权限提示并确认安装。
 5. 在扩展菜单打开 MarkMind，选择语言和 AI 服务商。
 
-2.1.0 签名版本在重启 Firefox 后仍会保留，但不含 2.2.0 的 DeepSeek 服务商和可跳过引导。通过 Mozilla 签名不等于在 AMO 公开上架。签名只适用于这个 2.1.0 发布包；2.2.0、自行构建或修改后的代码，都需要重新提交 Mozilla 签名才能永久安装。参见 Mozilla 的[签名说明](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/)。
+签名版本在重启 Firefox 后仍会保留，并包含 DeepSeek 服务商和可跳过引导。通过 Mozilla 签名不等于在 AMO 公开上架。签名只适用于此发布包；自行构建或后续修改代码后，需要重新提交 Mozilla 签名才能永久安装。参见 Mozilla 的[签名说明](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/)。
 
-### Firefox：临时加载未签名 2.2.0 预发布版
+[旧版 2.1.0 签名 XPI](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi)仍可下载供参考，但其中没有 2.2.0 新功能。
 
-1. 从本分支的 2.2.0 预发布附件下载 markmind-firefox-2.2.0.zip，或自行构建。
+### Firefox：临时加载未签名开发版本
+
+1. 从本分支的发布附件下载 markmind-firefox-2.2.0.zip，或自行构建。
 2. 解压 ZIP，并保留解压目录。
 3. 在 Firefox 地址栏打开 about:debugging#/runtime/this-firefox。
 4. 点击“临时载入附加组件”，选择解压目录里的 manifest.json。自行构建时选择 dist/firefox/manifest.json。
 5. 在扩展菜单打开 MarkMind，选择语言和 AI 服务商。
 
-临时扩展在重启 Firefox 后会卸载，需要重新选择同一个 manifest.json。等待签名期间，可用此方式测试 2.2.0 新功能。如果现在就需要重启后保留的签名版本，可选择上面的旧版 2.1.0，但其中没有这些新功能。参见 Mozilla 的[临时安装说明](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)。
+临时扩展在重启 Firefox 后会卸载，需要重新选择同一个 manifest.json。未签名 ZIP 与本地解压构建用于测试和开发；日常使用请安装上面的 2.2.0 签名正式版。参见 Mozilla 的[临时安装说明](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)。
 
 ### Chrome / Edge：加载构建目录
 
@@ -139,9 +141,9 @@ npm run package:firefox
 
 - dist/chromium：可加载到 Chrome / Chromium / Edge 的解压扩展。
 - dist/firefox：可临时加载到 Firefox 的解压扩展，包含 manifest.json。
-- artifacts/markmind-firefox-2.2.0.zip：未签名的 Firefox 预发布包。
+- artifacts/markmind-firefox-2.2.0.zip：未签名的 Firefox 开发包。
 
-旧版 2.1.0 签名 XPI 是另行提供的[发布附件](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi)，不是上述本地构建命令的产物，也不含 2.2.0 的修改。重新构建或修改源码不会保留其 Mozilla 签名；2.2.0 包必须重新签名。
+2.2.0 签名 XPI 是另行提供的[发布附件](https://github.com/zeya-labs/MarkMind/releases/download/v2.2.0/markmind-firefox-2.2.0-signed.xpi)，不是上述本地构建命令的产物。重新构建或修改源码不会保留其 Mozilla 签名；新构建或修改后的包必须重新签名。
 
 npm run dev 用于 Chromium 开发；npm run build:firefox 只重建 Firefox 版本。tools/github-actions-ci.yml 提供自动检查、测试、双浏览器构建、校验和打包的 GitHub Actions 模板。当前发布凭据缺少 workflow 权限，因此模板尚未启用；如需启用，请使用具有工作流权限的凭据将其复制到 .github/workflows/ci.yml。自动打包的产物仍未签名。
 
