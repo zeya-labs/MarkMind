@@ -3,6 +3,7 @@ import { splitFolderPath } from '../../utils/folders';
 import { stripRootSegment } from '../../utils/folderDisplay';
 import FolderTreeGroup from '../FolderTreeGroup/FolderTreeGroup';
 import './BookmarkTreePath.css';
+import { useI18n } from '../../i18n';
 
 interface BookmarkTreePathProps {
   folderPath: string;
@@ -16,19 +17,20 @@ const BookmarkTreePath = ({
   folderPath,
   bookmarkTitle,
   isNewFolder,
-  label = 'Suggested location',
+  label,
   defaultExpanded = true,
 }: BookmarkTreePathProps) => {
+  const { t } = useI18n();
   const cleanPath = stripRootSegment(folderPath);
   const displayPath = splitFolderPath(cleanPath).join(' / ');
 
   return (
     <div className="bookmark-tree-path">
-      <span className="bookmark-tree-path-label">{label}</span>
+      <span className="bookmark-tree-path-label">{label ?? t('Suggested location')}</span>
       <FolderTreeGroup
         groupName={displayPath}
         itemCount={1}
-        badge={isNewFolder ? 'New' : undefined}
+        badge={isNewFolder ? t('New') : undefined}
         defaultExpanded={defaultExpanded}
       >
         <div className="bookmark-tree-path-item">
@@ -37,7 +39,7 @@ const BookmarkTreePath = ({
         </div>
       </FolderTreeGroup>
       {isNewFolder && (
-        <span className="bookmark-tree-path-new-hint">This folder will be created for you</span>
+        <span className="bookmark-tree-path-new-hint">{t('This folder will be created for you')}</span>
       )}
     </div>
   );

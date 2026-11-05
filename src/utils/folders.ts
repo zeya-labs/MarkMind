@@ -5,6 +5,10 @@ import {
   type FolderPathMap,
 } from '../types/bookmarks';
 import { getBookmarkTree } from '../services/bookmarks';
+import { getDefaultBookmarkParent, isWritableFolder } from './bookmarkRoots';
+import { escapeFolderSegment, getFolderPathName, splitFolderPath } from './folderPath';
+
+export { splitFolderPath } from './folderPath';
 
 interface TraversalStats {
   maxDepth: number;
@@ -12,7 +16,7 @@ interface TraversalStats {
 }
 
 const getFolderChildren = (node: ChromeBookmarkNode): ChromeBookmarkNode[] => {
-  return (node.children ?? []).filter(child => !child.url && child.title);
+  return (node.children ?? []).filter(isWritableFolder);
 };
 
 const buildTreeLines = (
@@ -25,12 +29,12 @@ const buildTreeLines = (
   pathMap: FolderPathMap,
   stats: TraversalStats
 ): void => {
-  if (node.url || !node.title) {
+  if (!isWritableFolder(node)) {
     return;
   }
 
-  const folderName = node.title;
-  const escapedFolderName = folderName.replace(/\//g, '\\/');
+  const folderName = getFolderPathName(node);
+  const escapedFolderName = escapeFolderSegment(folderName);
   const currentPath = [parentPath, escapedFolderName].filter(Boolean).join('/');
 
   const connector = isLastChild ? '└── ' : '├── ';
@@ -47,10 +51,6 @@ const buildTreeLines = (
     const isLast = index === folderChildren.length - 1;
     buildTreeLines(child, currentPath, childPrefix, isLast, depth + 1, lines, pathMap, stats);
   });
-};
-
-export const splitFolderPath = (path: string): string[] => {
-  return path.split(/(?<!\\)\//).map(segment => segment.replace(/\\\//g, '/'));
 };
 
 const MAX_VISIBLE_SEGMENTS = 3;
@@ -89,9 +89,9 @@ export const buildFullIdToPathMapFromTree = (tree: ChromeBookmarkNode[]): Record
   const idToPathMap: Record<string, string> = {};
 
   const traverse = (node: ChromeBookmarkNode, parentPath: string): void => {
-    if (node.url || !node.title) return;
+    if (!isWritableFolder(node)) return;
 
-    const escapedTitle = node.title.replace(/\//g, '\\/');
+    const escapedTitle = escapeFolderSegment(getFolderPathName(node));
     const currentPath = parentPath ? `${parentPath}/${escapedTitle}` : escapedTitle;
 
     idToPathMap[node.id] = currentPath;
@@ -138,13 +138,11 @@ export const getFolderDataForAI = async (): Promise<FolderDataForAI> => {
   }
 
   const rootNode = tree[0];
-  const rootChildren = rootNode.children ?? [];
   const lines: string[] = [];
   const pathToIdMap: FolderPathMap = {};
   const stats: TraversalStats = { maxDepth: 0, totalCount: 0 };
 
-  // Use the first root folder (typically Bookmarks Bar) as default parent for new folders
-  const defaultParentId = rootChildren.length > 0 ? rootChildren[0].id : rootNode.id;
+  const defaultParentId = getDefaultBookmarkParent(tree);
 
   const rootFolders = getFolderChildren(rootNode);
 

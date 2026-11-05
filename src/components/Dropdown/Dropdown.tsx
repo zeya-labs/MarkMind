@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useI18n } from '../../i18n';
+import { useState, useCallback, useEffect, useRef, useId } from 'react';
 import { ChevronDownIcon, CheckIcon } from '../icons/Icons';
 import './Dropdown.css';
 
@@ -17,8 +18,13 @@ interface DropdownProps {
 }
 
 const Dropdown = ({ label, options, selectedId, onSelect, placeholder, disabled = false }: DropdownProps) => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const labelId = useId();
+  const valueId = useId();
+  const menuId = useId();
 
   const selectedOption = options.find(option => option.id === selectedId);
   const hasSelection = !!selectedOption;
@@ -32,13 +38,36 @@ const Dropdown = ({ label, options, selectedId, onSelect, placeholder, disabled 
   const handleOptionSelect = useCallback((optionId: string): void => {
     onSelect(optionId);
     setIsOpen(false);
+    triggerRef.current?.focus();
   }, [onSelect]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent): void => {
     if (event.key === 'Escape') {
+      event.preventDefault();
       setIsOpen(false);
+      triggerRef.current?.focus();
+      return;
     }
-  }, []);
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key) || disabled) return;
+    event.preventDefault();
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+    const items = [...(dropdownRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? [])];
+    if (items.length === 0) return;
+    const current = items.findIndex(item => item === document.activeElement);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
+      : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items[next].focus();
+  }, [disabled, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const items = [...(dropdownRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? [])];
+    const selected = items.find(item => item.getAttribute('aria-selected') === 'true');
+    (selected ?? items[0])?.focus();
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -57,27 +86,41 @@ const Dropdown = ({ label, options, selectedId, onSelect, placeholder, disabled 
   }, [isOpen]);
 
   return (
-    <div className="dropdown" ref={dropdownRef} onKeyDown={handleKeyDown}>
-      <span className="dropdown-label">{label}</span>
+    <div
+      className="dropdown"
+      ref={dropdownRef}
+      onKeyDown={handleKeyDown}
+      onBlur={event => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
+      }}
+    >
+      <span id={labelId} className="dropdown-label">{t(label)}</span>
       <button
+        ref={triggerRef}
         className={`dropdown-trigger ${isOpen ? 'open' : ''} ${disabled ? 'disabled' : ''} ${!hasSelection ? 'placeholder' : ''}`}
         onClick={handleToggle}
         type="button"
         disabled={disabled}
+        aria-labelledby={`${labelId} ${valueId}`}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? menuId : undefined}
       >
-        <span className="dropdown-trigger-text">{displayLabel}</span>
+        <span id={valueId} className="dropdown-trigger-text">{t(displayLabel)}</span>
         <ChevronDownIcon />
       </button>
       {isOpen && (
-        <div className="dropdown-menu">
+        <div id={menuId} className="dropdown-menu" role="listbox" aria-labelledby={labelId}>
           {options.map((option) => (
             <button
               key={option.id}
               className={`dropdown-option ${option.id === selectedId ? 'selected' : ''}`}
               onClick={() => handleOptionSelect(option.id)}
               type="button"
+              role="option"
+              aria-selected={option.id === selectedId}
             >
-              <span className="dropdown-option-text">{option.label}</span>
+              <span className="dropdown-option-text">{t(option.label)}</span>
               {option.id === selectedId && <CheckIcon />}
             </button>
           ))}

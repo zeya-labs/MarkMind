@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import { type ApiKeyPanelHandlerDeps } from '../types';
 import { removeCustomOriginPermission } from '../../../utils/customProviderPermissions';
 
@@ -11,7 +12,7 @@ export const createHandleApiKeyRemove = (deps: HandleApiKeyRemoveDeps) => {
     const { currentService, setHasExistingKey, setApiKeyInput, showStatusMessage, onClose } = deps;
 
     const confirmRemoval = window.confirm(
-      'Are you sure you want to remove your API key?'
+      t('Are you sure you want to remove your API key?')
     );
 
     if (!confirmRemoval) return;
@@ -39,7 +40,7 @@ export const createHandleApiKeyRemove = (deps: HandleApiKeyRemoveDeps) => {
       onClose?.();
     } catch (error) {
       console.error('Failed to remove API key:', error);
-      showStatusMessage('Failed to remove API key', 'error');
+      showStatusMessage(t('Failed to remove API key'), 'error');
     }
   };
 };

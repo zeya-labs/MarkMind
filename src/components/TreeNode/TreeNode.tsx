@@ -5,6 +5,7 @@ import { ArrowRightIcon, WarningIcon } from '../icons/Icons';
 import OrganizeCheckbox from '../OrganizeCheckbox/OrganizeCheckbox';
 import Button from '../Button/Button';
 import './TreeNode.css';
+import { useI18n } from '../../i18n';
 
 interface TreeNodeProps {
   node: FolderTreeNode;
@@ -23,6 +24,7 @@ const TreeNode = ({
   onToggleBookmarks,
   onToggleExpand,
 }: TreeNodeProps) => {
+  const { t } = useI18n();
   // node reference is stable between selection changes — only updates after a new scan
   const allBookmarksInNode = useMemo(() => getAllBookmarksInNode(node), [node]);
 
@@ -31,7 +33,9 @@ const TreeNode = ({
   const isPartialSelected = selectedInNode.length > 0 && !isFullSelected;
   const isExpanded = expandedPaths.has(node.path);
   const hasChildren = node.children.length > 0 || node.bookmarks.length > 0;
-  const isOrphaned = node.name === 'Root';
+  const isOrphaned = node.name === 'Root'
+    && allBookmarksInNode.length > 0
+    && allBookmarksInNode.every(bookmark => bookmark.currentFolderPath === 'Root');
 
   return (
     <div className="organize-tree-node">
@@ -43,6 +47,7 @@ const TreeNode = ({
           variant="unstyled"
           className={`organize-tree-expand-btn ${isExpanded ? 'open' : ''} ${!hasChildren ? 'invisible' : ''}`}
           onClick={() => onToggleExpand(node.path)}
+          title={t(isExpanded ? 'Collapse {name}' : 'Expand {name}', { name: node.name })}
         >
           <ArrowRightIcon width={8} height={8} />
         </Button>
@@ -51,17 +56,18 @@ const TreeNode = ({
           variant="unstyled"
           className="organize-check-wrap"
           onClick={() => onToggleBookmarks(allBookmarksInNode.map(bookmark => bookmark.id))}
+          title={t('Select bookmarks in {folder}', { folder: node.name })}
         >
           <OrganizeCheckbox state={isFullSelected ? 'full' : isPartialSelected ? 'partial' : 'empty'} />
         </Button>
 
         {isOrphaned && (
-          <span className="organize-tree-orphaned-icon" title="These bookmarks have no valid parent folder">
+          <span className="organize-tree-orphaned-icon" title={t('These bookmarks have no valid parent folder')}>
             <WarningIcon width={10} height={10} />
           </span>
         )}
         <span className={`organize-tree-folder-name ${isOrphaned ? 'orphaned' : ''}`}>
-          {isOrphaned ? 'Orphaned' : node.name}
+          {isOrphaned ? t('Orphaned') : node.name}
         </span>
         <span className="organize-tree-folder-count">{allBookmarksInNode.length}</span>
       </div>
@@ -92,6 +98,7 @@ const TreeNode = ({
                   variant="unstyled"
                   className="organize-check-wrap"
                   onClick={() => onToggleBookmarks([bookmark.id])}
+                  title={t('Select {name}', { name: bookmark.title })}
                 >
                   <OrganizeCheckbox state={isSelected ? 'full' : 'empty'} />
                 </Button>

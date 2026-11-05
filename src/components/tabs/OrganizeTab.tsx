@@ -9,6 +9,7 @@ import OrganizeError from '../OrganizeError/OrganizeError';
 import OrganizeStatusView from '../OrganizeStatusView/OrganizeStatusView';
 import { type OrganizeSession } from '../../types/organize';
 import { formatDestinationLabel } from '../../utils/destination';
+import { useI18n } from '../../i18n';
 
 const getDestinationLabel = (session: OrganizeSession): string | undefined => {
   const destination = (session.destinationFolders ?? []).find(folder => folder.id === session.destinationFolderId);
@@ -16,6 +17,7 @@ const getDestinationLabel = (session: OrganizeSession): string | undefined => {
 };
 
 const OrganizeTab = () => {
+  const { t, language } = useI18n();
   const {
     session,
     bookmarkStats,
@@ -62,19 +64,19 @@ const OrganizeTab = () => {
       // Once a pass completes we have a real count to show — more honest than the
       // rotating messages, which carry the wait until the first pass finishes.
       const organizingTitle = organizeProgress
-        ? `Organized ${organizeProgress.processed.toLocaleString()} of ${organizeProgress.total.toLocaleString()} bookmarks...`
+        ? t('Organized {processed} of {total} bookmarks...', { processed: organizeProgress.processed.toLocaleString(language), total: organizeProgress.total.toLocaleString(language) })
         : statusType === 'loading' && statusMessage
           ? statusMessage
-          : 'Analyzing your bookmarks...';
+          : t('Analyzing your bookmarks...');
 
       return (
         <OrganizeStatusView
           icon={<SpinnerIcon width={24} height={24} />}
           title={organizingTitle}
-          description={`Working for ${formatElapsedTime(elapsedSeconds)} — feel free to close this popup. MarkMind keeps organizing in the background; come back anytime to check progress.`}
+          description={t('Working for {time} — feel free to close this popup. MarkMind keeps organizing in the background; come back anytime to check progress.', { time: formatElapsedTime(elapsedSeconds) })}
         >
           <Button onClick={handleCancelOrganizing} fullWidth>
-            Cancel
+            {t('Cancel')}
           </Button>
         </OrganizeStatusView>
       );
@@ -100,8 +102,8 @@ const OrganizeTab = () => {
       return (
         <OrganizeStatusView
           icon={<SpinnerIcon width={20} height={20} />}
-          title="Moving bookmarks..."
-          description="Please wait while your bookmarks are being reorganized"
+          title={t('Moving bookmarks...')}
+          description={t('Please wait while your bookmarks are being reorganized')}
         />
       );
 

@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useOrganizeBookmark } from '../../hooks/useOrganizeBookmark';
 import WelcomeBanner from '../WelcomeBanner/WelcomeBanner';
 import CurrentPageCard from '../CurrentPageCard/CurrentPageCard';
@@ -17,6 +18,7 @@ const HomeTab = ({
   showCardTooltip = false,
   onDismissCardTooltip,
 }: HomeTabProps) => {
+  const { t } = useI18n();
   const {
     currentPageData,
     isLoadingPage,
@@ -49,7 +51,7 @@ const HomeTab = ({
       />
       {showCardTooltip && onDismissCardTooltip && (
         <OnboardingTooltip
-          content="This shows the page you're on. Hit Organize to find the perfect folder!"
+          content={t("This shows the page you're on. Hit Organize to find the perfect folder!")}
           onDismiss={onDismissCardTooltip}
         />
       )}

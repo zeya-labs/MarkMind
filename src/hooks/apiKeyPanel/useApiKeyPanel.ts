@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { EMPTY_SERVICE, getServiceCredentialKeys, isServiceConfigured, type ServiceConfig } from '../../config/services';
 import { type StatusType } from '../../types/common';
@@ -206,8 +207,8 @@ export const useApiKeyPanel = ({ isOpen, canClose, onClose }: UseApiKeyPanelProp
     modelsRefreshTrigger,
     hasExistingKey,
     isEditingKey,
-    status,
-    buttonError,
+    status: { ...status, message: t(status.message) },
+    buttonError: t(buttonError),
     canClosePanel,
     handleServiceChange,
     handleModelChange,

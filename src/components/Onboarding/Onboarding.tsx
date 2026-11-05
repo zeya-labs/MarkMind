@@ -1,3 +1,5 @@
+import { useI18n } from '../../i18n';
+import LanguageSelector from '../../i18n/LanguageSelector';
 import Button from '../Button/Button';
 import {
   SparklesIcon,
@@ -33,6 +35,7 @@ const Onboarding = ({
   onToggleTheme,
   startAtStep,
 }: OnboardingProps) => {
+  const { t } = useI18n();
   const {
     currentStep,
     stepIndex,
@@ -63,7 +66,7 @@ const Onboarding = ({
 
   const renderBackButton = () => (
     <div className="onboarding-back-row">
-      <Button variant="icon" onClick={handleBack} title="Go back">
+      <Button variant="icon" onClick={handleBack} title={t("Go back")}>
         <ArrowLeftIcon />
       </Button>
     </div>
@@ -76,29 +79,24 @@ const Onboarding = ({
         alt="MarkMind"
         className="onboarding-welcome-logo"
       />
-      <h1 className="onboarding-welcome-title">Welcome to MarkMind</h1>
-      <p className="onboarding-welcome-subtitle">
-        Your bookmarks are about to get organized.
-        Automatically. By AI. For free.
-      </p>
+      <h1 className="onboarding-welcome-title">{t("Welcome to MarkMind")}</h1>
+      <p className="onboarding-welcome-subtitle">{t("Your bookmarks are about to get organized with AI.")}</p>
       <div className="onboarding-features">
         <div className="onboarding-feature-item">
           <SparklesIcon width={16} height={16} />
-          <span>Smart folders, zero effort</span>
+          <span>{t("Smart folders, zero effort")}</span>
         </div>
         <div className="onboarding-feature-item">
           <ShieldIcon width={16} height={16} />
-          <span>Your data stays on your device</span>
+          <span>{t("Your API key stays on your device")}</span>
         </div>
         <div className="onboarding-feature-item">
           <CheckCircleIcon width={16} height={16} />
-          <span>Completely free, no credit card</span>
+          <span>{t("Free extension, your choice of AI")}</span>
         </div>
       </div>
       <div className="onboarding-cta">
-        <Button variant="primary" fullWidth onClick={handleNext}>
-          Let's get started
-        </Button>
+        <Button variant="primary" fullWidth onClick={handleNext}>{t("Let's get started")}</Button>
       </div>
     </div>
   );
@@ -106,93 +104,80 @@ const Onboarding = ({
   const renderExplainStep = () => (
     <div className="onboarding-step">
       {renderBackButton()}
-      <h2 className="onboarding-explain-title">How does it work?</h2>
-      <p className="onboarding-explain-text">
-        MarkMind uses AI to read your bookmarks and sort them into the right folders.
-        We recommend starting with Google Gemini because it's completely free.
-      </p>
-      <p className="onboarding-explain-text">
-        To connect, you need a special password called an API key.
-        Think of it like a Wi-Fi password that lets MarkMind talk to the AI.
-      </p>
+      <h2 className="onboarding-explain-title">{t("How does it work?")}</h2>
+      <p className="onboarding-explain-text">{t("MarkMind uses AI to sort your bookmarks into folders. Gemini offers a free tier with usage limits; availability and pricing depend on your provider.")}</p>
+      <p className="onboarding-explain-text">{t("To connect, you need an API key from your AI provider. It lets MarkMind send requests directly to that service.")}</p>
       <div className="onboarding-reassurances">
         <div className="onboarding-reassurance-item">
           <CheckCircleIcon width={16} height={16} />
-          <span>100% free. No credit card needed.</span>
+          <span>{t("The extension is free; AI usage depends on your provider.")}</span>
         </div>
         <div className="onboarding-reassurance-item">
           <ShieldIcon width={16} height={16} />
-          <span>Your data never leaves your device.</span>
+          <span>{t("Bookmark metadata is sent to your selected AI provider.")}</span>
         </div>
         <div className="onboarding-reassurance-item">
           <KeyIcon width={16} height={16} />
-          <span>Takes about 30 seconds to set up.</span>
+          <span>{t("Set up your preferred provider in a few steps.")}</span>
         </div>
       </div>
       <div className="onboarding-cta">
-        <Button variant="primary" fullWidth onClick={handleNext}>
-          Show me how
-        </Button>
+        <Button variant="primary" fullWidth onClick={handleNext}>{t("Show me how")}</Button>
       </div>
       <Button
         variant="unstyled"
         className="onboarding-escape-link"
         onClick={handleEscape}
-      >
-        Already have an API key from another provider?
-      </Button>
+      >{t("Already have an API key from another provider?")}</Button>
     </div>
   );
 
   const renderGuideStep = () => (
     <div className="onboarding-step">
       {renderBackButton()}
-      <h2 className="onboarding-guide-title">Let's grab your free key</h2>
-      <p className="onboarding-guide-subtitle">Follow these 4 simple steps:</p>
+      <h2 className="onboarding-guide-title">{t("Let's grab your API key")}</h2>
+      <p className="onboarding-guide-subtitle">{t("Follow these 4 simple steps:")}</p>
       <div className="step-list">
         <div className="step-list-row">
           <span className="step-list-number">1</span>
-          <span className="step-list-text">
-            Open Google AI Studio
-            <span className="onboarding-step-link">
+          <span className="step-list-text">{t("Open Google AI Studio")}<span className="onboarding-step-link">
               {' '}
               <Button variant="ghost" compact onClick={handleOpenAIStudio}>
-                <ExternalLinkIcon width={10} height={10} />
-                Open
-              </Button>
+                <ExternalLinkIcon width={10} height={10} />{t("Open")}</Button>
             </span>
           </span>
         </div>
         <div className="step-list-row">
           <span className="step-list-number">2</span>
-          <span className="step-list-text">Sign in with your Google account</span>
+          <span className="step-list-text">{t("Sign in with your Google account")}</span>
         </div>
         <div className="step-list-row">
           <span className="step-list-number">3</span>
-          <span className="step-list-text">Click "Create API Key"</span>
+          <span className="step-list-text">{t("Click \"Create API Key\"")}</span>
         </div>
         <div className="step-list-row">
           <span className="step-list-number">4</span>
-          <span className="step-list-text">Copy the key and paste it below</span>
+          <span className="step-list-text">{t("Copy the key and paste it below")}</span>
         </div>
       </div>
       <div className="onboarding-input-section">
         <input
           type="password"
-          placeholder="Paste your key here"
+          aria-label={t('API Key')}
+          aria-invalid={!!errorMessage}
+          aria-describedby={errorMessage ? 'onboarding-key-error' : undefined}
+          placeholder={t("Paste your key here")}
           value={apiKeyInput}
           onChange={handleApiKeyInputChange}
           onKeyDown={handleApiKeyInputKeyDown}
           disabled={isValidating}
         />
         {errorMessage && (
-          <p className="onboarding-error-message">{errorMessage}</p>
+          <p id="onboarding-key-error" role="alert" className="onboarding-error-message">{t(errorMessage)}</p>
         )}
         {isValidating && (
           <p className="onboarding-validating-text">
-            <SpinnerIcon width={12} height={12} />
-            Connecting...
-          </p>
+            <SpinnerIcon width={12} height={12} />{t("Connecting...")}</p>
         )}
         <Button
           variant="primary"
@@ -200,7 +185,7 @@ const Onboarding = ({
           onClick={handleApiKeySubmit}
           disabled={isValidating}
         >
-          {isValidating ? 'Connecting...' : 'Connect to Google AI'}
+          {isValidating ? t("Connecting...") : t("Connect to Google AI")}
         </Button>
       </div>
     </div>
@@ -209,14 +194,10 @@ const Onboarding = ({
   const renderSuccessStep = () => (
     <div className="onboarding-success">
       <CheckCircleIcon width={48} height={48} className="onboarding-success-icon" />
-      <h2 className="onboarding-success-title">You're all set!</h2>
-      <p className="onboarding-success-subtitle">
-        MarkMind is connected and ready to organize your bookmarks.
-      </p>
+      <h2 className="onboarding-success-title">{t("You're all set!")}</h2>
+      <p className="onboarding-success-subtitle">{t("MarkMind is connected and ready to organize your bookmarks.")}</p>
       <div className="onboarding-cta">
-        <Button variant="primary" fullWidth onClick={handleNext}>
-          Start organizing
-        </Button>
+        <Button variant="primary" fullWidth onClick={handleNext}>{t("Start organizing")}</Button>
       </div>
     </div>
   );
@@ -250,10 +231,11 @@ const Onboarding = ({
               <h1 className="header-title">MarkMind</h1>
             </div>
             <div className="header-right">
+              <LanguageSelector />
               <Button
                 variant="icon"
                 onClick={onToggleTheme}
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={theme === 'dark' ? t("Switch to light mode") : t("Switch to dark mode")}
               >
                 {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
               </Button>

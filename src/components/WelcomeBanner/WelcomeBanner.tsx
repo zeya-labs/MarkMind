@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useState, useEffect, useCallback } from 'react';
 import Button from '../Button/Button';
 import { XIcon } from '../icons/Icons';
@@ -6,6 +7,7 @@ import './WelcomeBanner.css';
 const STORAGE_KEY_WELCOME_BANNER = 'hasSeenWelcomeBanner';
 
 const WelcomeBanner = () => {
+  const { t } = useI18n();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -37,16 +39,14 @@ const WelcomeBanner = () => {
   return (
     <div className="welcome-banner">
       <div className="welcome-banner-content">
-        <p className="welcome-banner-title">Welcome to MarkMind!</p>
-        <p className="welcome-banner-text">
-          Head over to <strong>Organize</strong> and let AI tidy up your bookmarks. You'll be surprised how fast it is.
-        </p>
+        <p className="welcome-banner-title">{t("Welcome to MarkMind!")}</p>
+        <p className="welcome-banner-text">{t("Open Organize and let AI tidy up your bookmarks.")}</p>
       </div>
       <Button
         variant="icon"
         className="welcome-banner-dismiss"
         onClick={handleDismiss}
-        title="Dismiss"
+        title={t("Dismiss")}
       >
         <XIcon width={12} height={12} />
       </Button>

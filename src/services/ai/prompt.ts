@@ -1,4 +1,5 @@
 import { type AIOrganizeRequest } from '../../types/ai';
+import { getOutputLanguageInstruction } from './language';
 
 export const SYSTEM_PROMPT = `You are an AI assistant specialized in organizing bookmarks into folders.
 Your task is to analyze a bookmark and suggest the best existing folder from the provided hierarchy, or suggest a new folder name if none fit.
@@ -43,6 +44,7 @@ export const buildUserPrompt = (request: AIOrganizeRequest): string => {
   parts.push('');
   parts.push('Choose the best matching folder path from the hierarchy above, or suggest "NEW: CategoryName" if none fit.');
   parts.push('Return ONLY the exact folder path using "/" as separator:');
+  parts.push(getOutputLanguageInstruction());
 
   return parts.join('\n');
 };

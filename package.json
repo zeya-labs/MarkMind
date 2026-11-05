@@ -1,17 +1,24 @@
 {
   "name": "markmind",
-  "version": "2.0.8",
+  "version": "2.1.0",
   "description": "Transform your chaotic bookmarks into organized bliss with AI",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run build:chromium && npm run build:firefox",
+    "typecheck": "tsc --noEmit",
+    "build:chromium": "tsc && vite build",
+    "build:firefox": "tsc && vite build --config vite.firefox.config.ts",
+    "lint:firefox": "node tools/lint-firefox.mjs",
+    "test:firefox": "node tools/firefox-smoke.mjs",
+    "package:firefox": "web-ext build --source-dir dist/firefox --artifacts-dir artifacts --filename markmind-firefox-{version}.zip --overwrite-dest",
     "lint": "eslint src/",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "keywords": [
     "chrome-extension",
+    "firefox-extension",
     "bookmarks",
     "ai",
     "organization"
@@ -31,9 +38,11 @@
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "selenium-webdriver": "^4.51.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0",
-    "vite": "^5.4.14",
-    "vitest": "^4.1.9"
+    "vite": "^6.4.4",
+    "vitest": "^4.1.9",
+    "web-ext": "^10.8.0"
   }
 }

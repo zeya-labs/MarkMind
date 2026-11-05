@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useCallback } from 'react';
 import { ExternalLinkIcon } from '../../icons/Icons';
 import { type PartnerApp } from '../../../types/discover';
@@ -8,6 +9,7 @@ interface PartnerCardProps {
 }
 
 const PartnerCard = ({ partner }: PartnerCardProps) => {
+  const { t } = useI18n();
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
@@ -21,20 +23,20 @@ const PartnerCard = ({ partner }: PartnerCardProps) => {
       href={partner.url}
       className="partner-card"
       onClick={handleClick}
-      title={`Visit ${partner.title}`}
+      title={t('Visit {name}', { name: partner.title })}
       target="_blank"
       rel="noopener noreferrer"
     >
       <div className="partner-card-logo">
-        <img src={partner.logoPath} alt={`${partner.title} logo`} width={36} height={36} />
+        <img src={partner.logoPath} alt={t('{name} logo', { name: partner.title })} width={36} height={36} />
       </div>
       <div className="partner-card-content">
         <div className="partner-card-meta">
-          <span className="partner-card-badge">Friend</span>
+          <span className="partner-card-badge">{t("Friend")}</span>
           <ExternalLinkIcon width={10} height={10} />
         </div>
         <h3 className="partner-card-title">{partner.title}</h3>
-        <p className="partner-card-description">{partner.description}</p>
+        <p className="partner-card-description">{t(partner.description)}</p>
       </div>
     </a>
   );

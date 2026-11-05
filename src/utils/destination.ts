@@ -1,6 +1,7 @@
 import { type ChromeBookmarkNode, type FolderPathMap } from '../types/bookmarks';
 import { type DestinationFolder } from '../types/organize';
-import { splitFolderPath } from './folders';
+import { escapeFolderSegment, getFolderPathName, splitFolderPath } from './folderPath';
+import { isWritableFolder } from './bookmarkRoots';
 
 export interface ScopedFolderData {
   folderTree: string;
@@ -17,9 +18,9 @@ export const listDestinationFolders = (tree: ChromeBookmarkNode[]): DestinationF
   const folders: DestinationFolder[] = [];
 
   const traverse = (node: ChromeBookmarkNode, parentPath: string, parentId: string | null): void => {
-    if (node.url || !node.title || node.unmodifiable) return;
+    if (!isWritableFolder(node)) return;
 
-    const escapedTitle = node.title.replace(/\//g, '\\/');
+    const escapedTitle = escapeFolderSegment(getFolderPathName(node));
     const path = parentPath ? `${parentPath}/${escapedTitle}` : escapedTitle;
 
     folders.push({ id: node.id, parentId, path });

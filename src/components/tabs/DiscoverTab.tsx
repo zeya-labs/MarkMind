@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useState, useCallback } from 'react';
 import { MegaphoneIcon, LightbulbIcon } from '../icons/Icons';
 import Button from '../Button/Button';
@@ -12,6 +13,7 @@ const SUB_TAB_ICONS: Record<string, React.ComponentType<{ width?: number; height
 };
 
 const DiscoverTab = () => {
+  const { t } = useI18n();
   const [activeSubTab, setActiveSubTab] = useState('whats-new');
 
   const handleSubTabClick = useCallback(
@@ -48,14 +50,14 @@ const DiscoverTab = () => {
               className="discover-sub-tab-button"
             >
               {SubTabIcon && <SubTabIcon width={12} height={12} />}
-              {subTab.label}
+              {t(subTab.label)}
             </Button>
           );
         })}
       </nav>
 
       <p className="discover-description">
-        {activeSubTabConfig?.description}
+        {t(activeSubTabConfig?.description ?? '')}
       </p>
 
       {renderActiveSection()}

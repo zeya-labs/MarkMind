@@ -1,11 +1,13 @@
+import { useI18n } from '../../i18n';
 import { useCallback } from 'react';
 import { GitHubIcon, BugIcon } from '../icons/Icons';
 import './Footer.css';
 
-const GITHUB_REPO_URL = 'https://github.com/migsilva89/MarkMind';
-const GITHUB_ISSUES_URL = 'https://github.com/migsilva89/MarkMind/issues';
+const GITHUB_REPO_URL = 'https://github.com/zeya-labs/MarkMind';
+const GITHUB_ISSUES_URL = 'https://github.com/zeya-labs/MarkMind/issues';
 
 const Footer = () => {
+  const { t } = useI18n();
   const handleOpenLink = useCallback((url: string) => () => {
     chrome.tabs.create({ url });
   }, []);
@@ -26,7 +28,7 @@ const Footer = () => {
         <button
           className="footer-icon-button"
           onClick={handleOpenLink(GITHUB_ISSUES_URL)}
-          title="Report a Bug"
+          title={t("Report a Bug")}
         >
           <BugIcon width={12} height={12} />
         </button>

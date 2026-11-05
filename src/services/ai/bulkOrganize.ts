@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { type FolderPlan, type ProposedFolder, type BookmarkAssignment, type CompactBookmark, type BulkOrganizeResult } from '../../types/organize';
 import { type FolderPathMap } from '../../types/bookmarks';
 import { BULK_ORGANIZE_SYSTEM_PROMPT, buildBulkOrganizeUserPrompt } from './bulkPrompt';
@@ -306,9 +307,9 @@ export const organizeBookmarks = async (
   }
 
   // Single pass keeps the AI's own summary; multi-pass uses a neutral one.
-  let summary = passCount === 1 ? (summaries[0] ?? '') : `Organized ${allAssignments.length} bookmarks into ${foldersByPath.size} folders.`;
+  let summary = passCount === 1 ? (summaries[0] ?? '') : t('Organized {bookmarks} bookmarks into {folders} folders.', { bookmarks: allAssignments.length, folders: foldersByPath.size });
   if (failedCount > 0) {
-    summary += ` ${failedCount} couldn't be processed — run organize again to finish the rest.`;
+    summary += t(" {count} couldn't be processed — run organize again to finish the rest.", { count: failedCount });
   }
 
   const folderPlan: FolderPlan = {

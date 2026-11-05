@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { type ChromeBookmarkNode } from '../types/bookmarks';
 
-// In-memory stand-in for chrome.bookmarks with the same callback API and
+// In-memory stand-in for the native Promise-based bookmarks API and
 // move/create semantics (append to the end of the new parent). Lets tests run
 // the real move logic against a synthetic tree — never the user's bookmarks.
 
@@ -39,7 +39,7 @@ export const installFakeBookmarks = (root: FakeNodeSpec): FakeBookmarks => {
   const nodes = new Map<string, FakeNode>();
   let nextId = 9000;
   const moveCalls: { id: string; parentId: string }[] = [];
-  const runtime: { lastError?: { message: string } } = {};
+  const runtime = {};
 
   const add = (spec: FakeNodeSpec, parentId?: string): void => {
     nodes.set(spec.id, {
@@ -68,12 +68,6 @@ export const installFakeBookmarks = (root: FakeNodeSpec): FakeBookmarks => {
     };
   };
 
-  const respond = <T>(callback: (value: T) => void, value: T, error?: string): void => {
-    runtime.lastError = error ? { message: error } : undefined;
-    callback(value);
-    runtime.lastError = undefined;
-  };
-
   const detach = (id: string): void => {
     const node = nodes.get(id)!;
     const parent = node.parentId ? nodes.get(node.parentId) : undefined;
@@ -81,35 +75,37 @@ export const installFakeBookmarks = (root: FakeNodeSpec): FakeBookmarks => {
   };
 
   const bookmarks = {
-    getTree: (callback: (tree: ChromeBookmarkNode[]) => void) => respond(callback, [toNode(root.id)]),
-    get: (id: string, callback: (results: ChromeBookmarkNode[]) => void) => {
-      if (!nodes.has(id)) return respond(callback, [], `Can't find bookmark for id.`);
-      respond(callback, [toNode(id)]);
+    getTree: async () => [toNode(root.id)],
+    get: async (id: string) => {
+      if (!nodes.has(id)) throw new Error(`Can't find bookmark for id.`);
+      return [toNode(id)];
     },
-    create: (details: { parentId: string; title: string; url?: string }, callback: (node: ChromeBookmarkNode) => void) => {
+    search: async (query: { url: string }) =>
+      [...nodes.values()].filter(node => node.url === query.url).map(node => toNode(node.id)),
+    create: async (details: { parentId: string; title: string; url?: string }) => {
       const parent = nodes.get(details.parentId);
-      if (!parent || parent.url) return respond(callback, undefined as unknown as ChromeBookmarkNode, `Can't find parent bookmark for id.`);
-      if (parent.unmodifiable) return respond(callback, undefined as unknown as ChromeBookmarkNode, `Can't modify managed bookmarks.`);
+      if (!parent || parent.url) throw new Error(`Can't find parent bookmark for id.`);
+      if (parent.unmodifiable) throw new Error(`Can't modify managed bookmarks.`);
       const id = String(nextId++);
       nodes.set(id, { id, parentId: parent.id, title: details.title, url: details.url, childIds: [] });
       parent.childIds.push(id);
-      respond(callback, toNode(id));
+      return toNode(id);
     },
-    move: (id: string, destination: { parentId: string }, callback: (node: ChromeBookmarkNode) => void) => {
+    move: async (id: string, destination: { parentId: string }) => {
       const node = nodes.get(id);
       const parent = nodes.get(destination.parentId);
-      if (!node || !parent || parent.url) return respond(callback, undefined as unknown as ChromeBookmarkNode, `Can't find bookmark for id.`);
-      if (parent.unmodifiable || node.unmodifiable) return respond(callback, undefined as unknown as ChromeBookmarkNode, `Can't modify managed bookmarks.`);
+      if (!node || !parent || parent.url) throw new Error(`Can't find bookmark for id.`);
+      if (parent.unmodifiable || node.unmodifiable) throw new Error(`Can't modify managed bookmarks.`);
       moveCalls.push({ id, parentId: parent.id });
       detach(id);
       node.parentId = parent.id;
       parent.childIds.push(id);
-      respond(callback, toNode(id));
+      return toNode(id);
     },
-    remove: (id: string, callback: () => void) => {
+    remove: async (id: string) => {
+      if (!nodes.has(id)) throw new Error(`Can't find bookmark for id.`);
       detach(id);
       nodes.delete(id);
-      respond(callback, undefined);
     },
   };
 

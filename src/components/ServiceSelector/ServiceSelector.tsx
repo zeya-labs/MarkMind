@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   SERVICES,
@@ -36,6 +37,7 @@ const ServiceSelector = ({
   section = 'all',
   externalServiceId,
 }: ServiceSelectorProps) => {
+  const { t } = useI18n();
   const [currentServiceId, setCurrentServiceId] = useState<string>('');
   const [currentModelId, setCurrentModelId] = useState<string>('');
   const [availableModels, setAvailableModels] = useState<ModelOption[]>([]);
@@ -214,22 +216,22 @@ const ServiceSelector = ({
     <div className="service-selector">
       {section !== 'model' && (
         <Dropdown
-          label="AI Provider"
+          label={t("AI Provider")}
           options={providerOptions}
           selectedId={currentServiceId}
           onSelect={handleProviderSelect}
-          placeholder="Select a provider..."
+          placeholder={t("Select a provider...")}
         />
       )}
       {section !== 'provider' && (
         <>
           <div className="service-selector-model-row">
             <Dropdown
-              label="Model"
+              label={t("Model")}
               options={modelOptions}
               selectedId={currentModelId}
               onSelect={handleModelSelect}
-              placeholder={isLoadingModels ? 'Loading models...' : modelsError || 'Select a model...'}
+              placeholder={isLoadingModels ? t("Loading models...") : modelsError ? t(modelsError) : t("Select a model...")}
               disabled={!hasProvider || isLoadingModels || availableModels.length === 0}
             />
             {isLoadingModels && (
@@ -242,14 +244,14 @@ const ServiceSelector = ({
                 variant="icon"
                 className="service-selector-refresh"
                 onClick={handleRefreshModels}
-                title="Refresh models"
+                title={t("Refresh models")}
               >
                 <RefreshIcon width={12} height={12} />
               </Button>
             )}
           </div>
           {modelsError && (
-            <p className="service-selector-error">{modelsError}</p>
+            <p className="service-selector-error">{t(modelsError)}</p>
           )}
         </>
       )}

@@ -2,16 +2,17 @@ import { type ChromeBookmarkNode, type BookmarkStats } from '../types/bookmarks'
 import { type CompactBookmark, type FolderTreeNode } from '../types/organize';
 import { stripRootSegment } from './folderDisplay';
 import { splitFolderPath } from './folders';
+import { escapeFolderSegment } from './folderPath';
 
 const traverseBookmarks = (
   node: ChromeBookmarkNode,
   idToPathMap: Record<string, string>,
   results: CompactBookmark[]
 ): void => {
-  if (node.url && node.title) {
+  if (node.url && node.type !== 'separator' && !node.unmodifiable) {
     results.push({
       id: node.id,
-      title: node.title,
+      title: node.title || node.url,
       url: node.url,
       currentFolderPath: node.parentId ? (idToPathMap[node.parentId] ?? 'Root') : 'Root',
       currentFolderId: node.parentId ?? '',
@@ -53,7 +54,7 @@ export const buildFolderTree = (bookmarks: CompactBookmark[]): FolderTreeNode =>
     for (let segmentIndex = 0; segmentIndex < segments.length; segmentIndex++) {
       const segment = segments[segmentIndex];
       const isLeafFolder = segmentIndex === segments.length - 1;
-      const nodePath = segments.slice(0, segmentIndex + 1).join('/');
+      const nodePath = segments.slice(0, segmentIndex + 1).map(escapeFolderSegment).join('/');
 
       const siblingMap = childrenByPath.get(currentNode.path)!;
       let childNode = siblingMap.get(segment);

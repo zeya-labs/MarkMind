@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import { SERVICES, MODELS_CACHE_KEY_PREFIX, SELECTED_SERVICE_STORAGE_KEY, SELECTED_MODEL_STORAGE_KEY } from '../../../config/services';
 import { fetchModelsForProvider } from '../../../services/ai/providerUtils';
 import { setSelectedServiceId, setSelectedModelId } from '../../../services/selectedState';
@@ -10,14 +11,14 @@ export const createHandleOnboardingKeySave = (deps: HandleOnboardingKeySaveDeps)
     const trimmedKey = apiKeyInput.trim();
 
     if (!trimmedKey) {
-      setErrorMessage('Paste your key in the field above first.');
+      setErrorMessage(t('Paste your key in the field above first.'));
       return;
     }
 
     const geminiService = SERVICES.google;
 
     if (!geminiService.validateKey(trimmedKey)) {
-      setErrorMessage("Hmm, that doesn't look right. Make sure you copied the whole key from Google AI Studio.");
+      setErrorMessage(t("Hmm, that doesn't look right. Make sure you copied the whole key from Google AI Studio."));
       return;
     }
 
@@ -30,7 +31,7 @@ export const createHandleOnboardingKeySave = (deps: HandleOnboardingKeySaveDeps)
       const models = await fetchModelsForProvider('google', trimmedKey);
 
       if (models.length === 0) {
-        setErrorMessage('Something went wrong loading AI models. Try again in a moment.');
+        setErrorMessage(t('Something went wrong loading AI models. Try again in a moment.'));
         setIsValidating(false);
         return;
       }
@@ -60,9 +61,9 @@ export const createHandleOnboardingKeySave = (deps: HandleOnboardingKeySaveDeps)
         || message.includes('unauthorized') || message.includes('permission');
 
       if (isAuthError) {
-        setErrorMessage("That key didn't work. Double-check you copied the full key from Google AI Studio.");
+        setErrorMessage(t("That key didn't work. Double-check you copied the full key from Google AI Studio."));
       } else {
-        setErrorMessage("Something went wrong on our end. Your key might be fine. Try again in a moment.");
+        setErrorMessage(t("Something went wrong on our end. Your key might be fine. Try again in a moment."));
       }
       setIsValidating(false);
     }

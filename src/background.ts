@@ -4,9 +4,10 @@ import { organizeBookmarks } from './services/ai/bulkOrganize';
 import { saveOrganizeSession, loadOrganizeSession, getInitialSession } from './services/organizeSession';
 import { isCancelledError } from './utils/helpers';
 import { scopeFolderDataToDestination, formatDestinationLabel } from './utils/destination';
+import { initI18n } from './i18n';
 
 const KEEPALIVE_ALARM_NAME = 'organize-keepalive';
-const KEEPALIVE_INTERVAL_MINUTES = 0.4;
+const KEEPALIVE_INTERVAL_MINUTES = 0.5;
 
 // The run in progress. Cancelling aborts its in-flight AI request and stops
 // further batches; starting a new run cancels the previous one.
@@ -25,9 +26,13 @@ const notifyPopup = (type: string, payload?: unknown): void => {
 };
 
 const handleStartOrganize = async (payload: StartOrganizePayload, run: AbortController): Promise<void> => {
-  chrome.alarms.create(KEEPALIVE_ALARM_NAME, {
-    periodInMinutes: KEEPALIVE_INTERVAL_MINUTES,
-  });
+  await initI18n();
+  if (run.signal.aborted) return;
+  if (chrome.runtime.getManifest?.().manifest_version !== 2) {
+    chrome.alarms.create(KEEPALIVE_ALARM_NAME, {
+      periodInMinutes: KEEPALIVE_INTERVAL_MINUTES,
+    });
+  }
 
   // With a destination the AI only sees that folder's subtree, with relative
   // paths, so every suggestion resolves inside it.

@@ -1,3 +1,5 @@
+import { useI18n } from '../../i18n';
+import LanguageSelector from '../../i18n/LanguageSelector';
 import { useState, useCallback } from 'react';
 import ServiceSelector from '../ServiceSelector/ServiceSelector';
 import Button from '../Button/Button';
@@ -35,6 +37,7 @@ const ApiKeyPanel = ({
   theme,
   onToggleTheme,
 }: ApiKeyPanelProps) => {
+  const { t } = useI18n();
   const {
     currentService,
     apiKeyInput,
@@ -106,11 +109,12 @@ const ApiKeyPanel = ({
                 <h2 className="header-title">MarkMind</h2>
               </div>
               <div className="header-right">
+                <LanguageSelector />
                 {onToggleTheme && (
                   <Button
                     variant="icon"
                     onClick={onToggleTheme}
-                    title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                    title={theme === 'dark' ? t("Switch to light mode") : t("Switch to dark mode")}
                   >
                     {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                   </Button>
@@ -120,27 +124,28 @@ const ApiKeyPanel = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="header-star-link"
-                  aria-label="Star us on GitHub"
+                  aria-label={t("Star us on GitHub")}
                 >
                   <StarIcon width={14} height={14} />
-                  <span className="header-star-tooltip">Star us on GitHub</span>
+                  <span className="header-star-tooltip">{t("Star us on GitHub")}</span>
                 </a>
               </div>
             </div>
           ) : (
             <div className="header-settings">
               <div className="header-left">
-                <Button variant="icon" onClick={handlePanelClose} title="Back">
+                <Button variant="icon" onClick={handlePanelClose} title={t("Back")}>
                   <ArrowLeftIcon />
                 </Button>
-                <h2 className="header-title">Settings</h2>
+                <h2 className="header-title">{t("Settings")}</h2>
               </div>
               <div className="header-right">
+                <LanguageSelector />
                 <div className="header-guide-link">
-                  <Button variant="icon" onClick={handleOpenSetupGuide} title="Setup Guide">
+                  <Button variant="icon" onClick={handleOpenSetupGuide} title={t("Setup Guide")}>
                     <InfoIcon />
                   </Button>
-                  <span className="header-guide-tooltip">Setup Guide</span>
+                  <span className="header-guide-tooltip">{t("Setup Guide")}</span>
                 </div>
               </div>
             </div>
@@ -150,11 +155,9 @@ const ApiKeyPanel = ({
         <div className="api-key-panel-body">
           {showWelcomeMessage && (
             <div className="welcome-message">
-              <p className="welcome-headline">You mark. We mind.</p>
-              <p className="welcome-subtext">Connect your AI to begin.</p>
-              <p className="welcome-subtext">
-                Your only setup for the magic to happen.
-              </p>
+              <p className="welcome-headline">{t("You mark. We mind.")}</p>
+              <p className="welcome-subtext">{t("Connect your AI to begin.")}</p>
+              <p className="welcome-subtext">{t("Your only setup for the magic to happen.")}</p>
             </div>
           )}
 
@@ -170,6 +173,7 @@ const ApiKeyPanel = ({
               <button
                 type="button"
                 className="api-key-card-info-trigger"
+                aria-label={t('About the free tier')}
                 aria-describedby="free-tier-tooltip"
                 onMouseEnter={() => setIsTooltipVisible(true)}
                 onMouseLeave={() => setIsTooltipVisible(false)}
@@ -183,15 +187,16 @@ const ApiKeyPanel = ({
                     role="tooltip"
                     className="api-key-card-info-tooltip"
                   >
-                    {currentService.freeTierNote}
+                    {t(currentService.freeTierNote)}
                   </div>
                 )}
               </button>
             )}
             {currentService.baseUrlStorageKey && (
               <div className="base-url-section">
-                <label className="base-url-label">Base URL</label>
+                <label htmlFor="provider-base-url" className="base-url-label">{t("Base URL")}</label>
                 <input
+                  id="provider-base-url"
                   type="url"
                   value={baseUrlInput}
                   onChange={handleBaseUrlInputChange}
@@ -199,7 +204,7 @@ const ApiKeyPanel = ({
                   autoComplete="off"
                   className="base-url-input"
                 />
-                <p className="base-url-hint">OpenAI-compatible endpoint (e.g. Ollama, vLLM, LiteLLM)</p>
+                <p className="base-url-hint">{t("OpenAI-compatible endpoint (e.g. Ollama, vLLM, LiteLLM)")}</p>
               </div>
             )}
 
@@ -208,31 +213,27 @@ const ApiKeyPanel = ({
                 <div className="api-key-configured-badge">
                   <CheckCircleIcon width={20} height={20} />
                   <div className="api-key-configured-info">
-                    <h3 className="api-key-configured-title">API Key Configured</h3>
-                    <p className="api-key-configured-subtitle">You're all set!</p>
+                    <h3 className="api-key-configured-title">{t("API Key Configured")}</h3>
+                    <p className="api-key-configured-subtitle">{t("You're all set!")}</p>
                   </div>
                 </div>
 
-                <Button variant="primary" onClick={handleGoToApp} className="btn-go-to-app">
-                  Start Organizing Bookmarks
-                  <ArrowRightIcon />
+                <Button variant="primary" onClick={handleGoToApp} className="btn-go-to-app">{t("Start Organizing Bookmarks")}<ArrowRightIcon />
                 </Button>
 
                 <button
                   className="api-key-change-link"
                   onClick={handleStartEditingKey}
                   type="button"
-                >
-                  Change API Key
-                </button>
+                >{t("Change API Key")}</button>
               </div>
             ) : hasExistingKey && !isEditingKey ? (
               <div className="api-key-configured">
                 <div className="api-key-configured-badge">
                   <CheckCircleIcon width={20} height={20} />
                   <div className="api-key-configured-info">
-                    <h3 className="api-key-configured-title">API Key Configured</h3>
-                    <p className="api-key-configured-subtitle">Select a model below to continue</p>
+                    <h3 className="api-key-configured-title">{t("API Key Configured")}</h3>
+                    <p className="api-key-configured-subtitle">{t("Select a model below to continue")}</p>
                   </div>
                 </div>
 
@@ -240,9 +241,7 @@ const ApiKeyPanel = ({
                   className="api-key-change-link"
                   onClick={handleStartEditingKey}
                   type="button"
-                >
-                  Change API Key
-                </button>
+                >{t("Change API Key")}</button>
               </div>
             ) : (
               <>
@@ -251,17 +250,18 @@ const ApiKeyPanel = ({
                     <KeyIcon />
                   </div>
                   <div className="api-key-titles">
-                    <h3 className="api-key-title">{currentService.label || 'API Key'}</h3>
-                    <p className="api-key-subtitle">Required for AI features</p>
+                    <h3 className="api-key-title">{t(currentService.label || 'API Key')}</h3>
+                    <p className="api-key-subtitle">{t("Required for AI features")}</p>
                   </div>
                 </div>
 
                 <input
                   type="password"
+                  aria-label={t(currentService.label || 'API Key')}
                   value={apiKeyInput}
                   onChange={handleApiKeyInputChange}
                   onKeyDown={handleApiKeyInputKeyDown}
-                  placeholder={!hasProviderSelected ? 'Select a provider first...' : hasExistingKey ? '••••••••••••••••' : currentService.placeholder}
+                  placeholder={!hasProviderSelected ? t('Select a provider first...') : hasExistingKey ? '••••••••••••••••' : t(currentService.placeholder)}
                   autoComplete="off"
                   disabled={!hasProviderSelected}
                 />
@@ -273,7 +273,7 @@ const ApiKeyPanel = ({
                     className={`btn-save${buttonError ? ' btn-save-error' : ''}`}
                     disabled={!hasProviderSelected}
                   >
-                    {buttonError || (hasExistingKey ? 'Update API Key' : 'Save API Key')}
+                    {buttonError ? t(buttonError) : (hasExistingKey ? t('Update API Key') : t('Save API Key'))}
                   </Button>
                 </div>
 
@@ -282,32 +282,27 @@ const ApiKeyPanel = ({
                     className="api-key-change-link"
                     onClick={handleCancelEditing}
                     type="button"
-                  >
-                    Cancel
-                  </button>
+                  >{t("Cancel")}</button>
                 )}
 
                 {status.type && (
                   <div className="api-key-card-status">
-                    <div className={`status ${status.type}`}>{status.message}</div>
+                    <div className={`status ${status.type}`} role={status.type === 'error' ? 'alert' : 'status'}>{t(status.message)}</div>
                     {status.showGoToApp && (
-                      <Button variant="primary" onClick={handleGoToApp} className="btn-go-to-app">
-                        Start Organizing Bookmarks
-                        <ArrowRightIcon />
+                      <Button variant="primary" onClick={handleGoToApp} className="btn-go-to-app">{t("Start Organizing Bookmarks")}<ArrowRightIcon />
                       </Button>
                     )}
                   </div>
                 )}
 
                 {currentService.helpLink && (
-                  <p className="api-key-help">
-                    Get your API key at{' '}
+                  <p className="api-key-help">{t("Get your API key at")}{' '}
                     <a
                       href={currentService.helpLink}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {currentService.helpLinkText}
+                      {t(currentService.helpLinkText)}
                     </a>
                   </p>
                 )}
@@ -331,23 +326,17 @@ const ApiKeyPanel = ({
                 <ShieldIcon />
               </div>
               <div className="info-card-titles">
-                <h3 className="info-card-title">Privacy & Security</h3>
-                <p className="info-card-subtitle">Your data stays local</p>
+                <h3 className="info-card-title">{t("Privacy & Security")}</h3>
+                <p className="info-card-subtitle">{t("Your key stays local")}</p>
               </div>
             </div>
-            <p className="info-card-text">
-              Your API key is stored locally in Chrome and never sent to our
-              servers. Bookmark data is only processed through your selected AI
-              provider.
-            </p>
+            <p className="info-card-text">{t("Your API key is stored locally in your browser. Bookmark metadata and relevant page context are sent directly to your selected AI provider for analysis.")}</p>
           </div>
 
           {isApiKeyInteractive && hasExistingKey && (
             <div className="danger-zone">
-              <h3 className="danger-zone-title">Danger Zone</h3>
-              <Button variant="danger" fullWidth onClick={handleApiKeyRemove}>
-                Remove API Key
-              </Button>
+              <h3 className="danger-zone-title">{t("Danger Zone")}</h3>
+              <Button variant="danger" fullWidth onClick={handleApiKeyRemove}>{t("Remove API Key")}</Button>
             </div>
           )}
         </div>

@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useCallback } from 'react';
 import {
   FolderIcon,
@@ -22,6 +23,7 @@ interface QuickActionsProps {
 }
 
 const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
+  const { t } = useI18n();
   const handleCardClick = useCallback(
     (action: QuickActionItem) => () => {
       if (action.externalUrl) {
@@ -37,7 +39,7 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
 
   return (
     <div className="quick-actions">
-      <h2 className="quick-actions-title">Quick Actions</h2>
+      <h2 className="quick-actions-title">{t("Quick Actions")}</h2>
       <div className="quick-actions-grid">
         {QUICK_ACTIONS.map((action) => {
           const ActionIcon = ACTION_ICONS[action.iconName];
@@ -50,8 +52,8 @@ const QuickActions = ({ onTabChange, onOpenSettings }: QuickActionsProps) => {
               <div className={`quick-actions-card-icon quick-actions-card-icon-${action.colorScheme}`}>
                 {ActionIcon && <ActionIcon width={14} height={14} />}
               </div>
-              <h3 className="quick-actions-card-title">{action.title}</h3>
-              <p className="quick-actions-card-description">{action.description}</p>
+              <h3 className="quick-actions-card-title">{t(action.title)}</h3>
+              <p className="quick-actions-card-description">{t(action.description)}</p>
             </button>
           );
         })}

@@ -1,54 +1,25 @@
 import { type ChromeBookmarkNode, type FolderPathMap } from '../types/bookmarks';
+import { escapeFolderSegment, splitFolderPath } from '../utils/folderPath';
 
 export const getBookmarkTree = async (): Promise<ChromeBookmarkNode[]> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.getTree((tree) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve(tree as ChromeBookmarkNode[]);
-    });
-  });
+  return await chrome.bookmarks.getTree() as ChromeBookmarkNode[];
 };
 
 export const getBookmarkById = async (id: string): Promise<ChromeBookmarkNode | null> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.get(id, (results) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve(results.length > 0 ? (results[0] as ChromeBookmarkNode) : null);
-    });
-  });
+  const results = await chrome.bookmarks.get(id);
+  return results.length > 0 ? results[0] as ChromeBookmarkNode : null;
 };
 
 export const findBookmarkByUrl = async (url: string): Promise<ChromeBookmarkNode | null> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.search({ url }, (results) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve(results.length > 0 ? (results[0] as ChromeBookmarkNode) : null);
-    });
-  });
+  const results = await chrome.bookmarks.search({ url });
+  return results.length > 0 ? results[0] as ChromeBookmarkNode : null;
 };
 
 export const createFolder = async (
   parentId: string,
   title: string
 ): Promise<ChromeBookmarkNode> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.create({ parentId, title }, (folder) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve(folder as ChromeBookmarkNode);
-    });
-  });
+  return await chrome.bookmarks.create({ parentId, title }) as ChromeBookmarkNode;
 };
 
 export const createBookmark = async (
@@ -56,42 +27,18 @@ export const createBookmark = async (
   title: string,
   url: string
 ): Promise<ChromeBookmarkNode> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.create({ parentId, title, url }, (bookmark) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve(bookmark as ChromeBookmarkNode);
-    });
-  });
+  return await chrome.bookmarks.create({ parentId, title, url }) as ChromeBookmarkNode;
 };
 
 export const moveBookmark = async (
   bookmarkId: string,
   destinationFolderId: string
 ): Promise<ChromeBookmarkNode> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.move(bookmarkId, { parentId: destinationFolderId }, (result) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve(result as ChromeBookmarkNode);
-    });
-  });
+  return await chrome.bookmarks.move(bookmarkId, { parentId: destinationFolderId }) as ChromeBookmarkNode;
 };
 
 export const removeBookmark = async (bookmarkId: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.remove(bookmarkId, () => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      resolve();
-    });
-  });
+  await chrome.bookmarks.remove(bookmarkId);
 };
 
 export const createFolderPath = async (
@@ -101,12 +48,32 @@ export const createFolderPath = async (
 ): Promise<string> => {
   // Blank segments ("", "A//B") would create untitled folders — an empty path
   // resolves to defaultParentId itself.
-  const segments = folderPath.split('/').filter(segment => segment.trim() !== '');
   let currentParentId = defaultParentId;
   let resolvedPath = '';
+  let remainingPath = folderPath;
+
+  // The AI may return existing names with literal slashes rather than their
+  // escaped path-map representation. Reuse an unambiguous longest known prefix
+  // before creating descendants; never reinterpret an ambiguous name.
+  const prefixes = Object.entries(pathToIdMap).flatMap(([path, id]) => {
+    const candidates = new Set([path, splitFolderPath(path).join('/')]);
+    return [...candidates]
+      .filter(candidate => folderPath === candidate || folderPath.startsWith(`${candidate}/`))
+      .map(candidate => ({ path, id, length: candidate.length }));
+  }).sort((a, b) => b.length - a.length);
+  const longest = prefixes.filter(prefix => prefix.length === prefixes[0]?.length);
+  if (longest.length > 0 && new Set(longest.map(prefix => prefix.id)).size === 1) {
+    const prefix = longest[0];
+    currentParentId = prefix.id;
+    resolvedPath = prefix.path;
+    remainingPath = folderPath.slice(prefix.length).replace(/^\//, '');
+  }
+
+  const segments = splitFolderPath(remainingPath).filter(segment => segment.trim() !== '');
 
   for (const segment of segments) {
-    resolvedPath = resolvedPath ? `${resolvedPath}/${segment}` : segment;
+    const escapedSegment = escapeFolderSegment(segment);
+    resolvedPath = resolvedPath ? `${resolvedPath}/${escapedSegment}` : escapedSegment;
 
     if (pathToIdMap[resolvedPath]) {
       currentParentId = pathToIdMap[resolvedPath];

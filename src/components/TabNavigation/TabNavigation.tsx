@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useCallback } from 'react';
 import { HomeIcon, FolderIcon, CompassIcon, BookOpenIcon, ExternalLinkIcon } from '../icons/Icons';
 import Button from '../Button/Button';
@@ -33,6 +34,7 @@ const TabNavigation = ({
   showOrganizeTooltip = false,
   onDismissOrganizeTooltip,
 }: TabNavigationProps) => {
+  const { t } = useI18n();
   const handleTabClick = useCallback(
     (tabConfig: TabConfig) => () => {
       if (tabConfig.isExternal && tabConfig.url) {
@@ -58,7 +60,7 @@ const TabNavigation = ({
               className="tab-navigation-button"
             >
               <TabIcon width={12} height={12} />
-              {tabConfig.label}
+              {t(tabConfig.label)}
               {tabConfig.isExternal && <ExternalLinkIcon width={8} height={8} />}
             </Button>
           );
@@ -67,7 +69,7 @@ const TabNavigation = ({
       {showOrganizeTooltip && onDismissOrganizeTooltip && (
         <div className="tab-navigation-tooltip">
           <OnboardingTooltip
-            content="Got messy bookmarks? This is where the magic happens."
+            content={t("Got messy bookmarks? This is where the magic happens.")}
             onDismiss={onDismissOrganizeTooltip}
           />
         </div>

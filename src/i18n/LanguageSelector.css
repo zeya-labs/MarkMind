@@ -1,0 +1,27 @@
+.language-selector {
+  display: flex;
+  flex-direction: column;
+  max-width: 120px;
+  flex-shrink: 0;
+}
+
+.language-selector select {
+  max-width: 120px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs);
+}
+
+.language-selector select:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+.language-selector [role='alert'] {
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+}

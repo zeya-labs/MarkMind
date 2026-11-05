@@ -114,7 +114,7 @@ export const hasArrayWithItems = (data: unknown, propertyName: string): boolean 
 const SIMILARITY_THRESHOLD = 0.75;
 
 const normalizeToWords = (text: string): string[] =>
-  text.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().split(/\s+/).filter(Boolean);
+  text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').trim().split(/\s+/).filter(Boolean);
 
 export const isHeadingSimilarToTitle = (title: string, heading: string): boolean => {
   const titleWords = new Set(normalizeToWords(title));

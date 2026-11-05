@@ -1,4 +1,5 @@
 import { type CompactBookmark } from '../../types/organize';
+import { getOutputLanguageInstruction } from './language';
 
 export const BULK_ORGANIZE_SYSTEM_PROMPT = `You are a bookmark organizer AI. Analyze bookmarks, propose a clean folder structure, and assign each bookmark to the best folder — all in one response.
 
@@ -47,7 +48,7 @@ Return ONLY valid JSON (no markdown fences, no extra text):
 
 PATH FORMAT RULES:
 - Use "/" as separator
-- NEVER include Chrome root folder names (like "Bookmarks bar", "Other bookmarks", "Mobile bookmarks") in paths — users don't know what these are. Start from the first meaningful folder (e.g., "AI/Learning" not "Bookmarks bar/AI/Learning")
+- NEVER include browser system root folder names (like "Bookmarks bar", "Other bookmarks", "Bookmarks Toolbar", "Bookmarks Menu", "Mobile Bookmarks", or their localized names) in paths. Start from the first meaningful folder (e.g., "AI/Learning" not "Bookmarks bar/AI/Learning")
 - For existing folders: use the path from the provided folder tree, but WITHOUT the root folder prefix
 - For new folders: include the full parent path (e.g., "ParentFolder/NewChild")
 - isNew = true ONLY for folders that need to be created
@@ -116,6 +117,7 @@ export const buildBulkOrganizeUserPrompt = (
     'Reuse existing folders where appropriate. Only create new folders when necessary.',
     'Return ONLY the JSON response.'
   );
+  parts.push(getOutputLanguageInstruction());
 
   return parts.join('\n');
 };

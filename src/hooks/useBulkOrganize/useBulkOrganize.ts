@@ -7,7 +7,7 @@ import { getBookmarkStats, flattenAllBookmarks } from '../../utils/bookmarkScann
 import { getFolderDataForAI, buildFullIdToPathMapFromTree } from '../../utils/folders';
 import { saveOrganizeSession, loadOrganizeSession, clearOrganizeSession, getInitialSession } from '../../services/organizeSession';
 import { createSessionSaveQueue } from '../../services/sessionSaveQueue';
-import { removeBookmark } from '../../services/bookmarks';
+import { getBookmarkTree, removeBookmark } from '../../services/bookmarks';
 import { applyAssignments, buildLiveDestinationScope } from '../../services/applyAssignments';
 import { listDestinationFolders } from '../../utils/destination';
 import { getSelectedMaxOutputTokens } from '../../services/selectedState';
@@ -210,15 +210,7 @@ export const useBulkOrganize = (): UseBulkOrganizeReturn => {
     try {
       await updateSession({ status: 'scanning' });
 
-      const bookmarkTree = await new Promise<chrome.bookmarks.BookmarkTreeNode[]>((resolve, reject) => {
-        chrome.bookmarks.getTree((tree) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-            return;
-          }
-          resolve(tree);
-        });
-      });
+      const bookmarkTree = await getBookmarkTree();
 
       // Build idToPathMap from the same tree used for scanning — guarantees 100% folder coverage
       const idToPathMap = buildFullIdToPathMapFromTree(bookmarkTree);

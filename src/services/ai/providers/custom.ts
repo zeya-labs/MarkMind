@@ -4,7 +4,7 @@ import { type ModelOption } from '../../../types/services';
 // Ollama answers 403 to browser-extension origins unless OLLAMA_ORIGINS allows
 // them (listing models still works, so setup looks fine until the first organize).
 export const CUSTOM_FORBIDDEN_MESSAGE =
-  'The endpoint refused the request (403). Ollama blocks browser extensions by default: restart it with OLLAMA_ORIGINS="chrome-extension://*". In LM Studio, turn on CORS in the server settings. For a remote endpoint, check your API key.';
+  'The endpoint refused the request (403). Ollama blocks browser extensions by default: allow your extension origin with OLLAMA_ORIGINS="chrome-extension://*,moz-extension://*" and restart Ollama. In LM Studio, turn on CORS in the server settings. For a remote endpoint, check your API key.';
 
 const buildAuthHeaders = (apiKey: string): Record<string, string> => {
   const trimmed = apiKey.trim();

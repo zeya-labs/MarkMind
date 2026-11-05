@@ -1,3 +1,5 @@
+import { useI18n } from '../../i18n';
+import LanguageSelector from '../../i18n/LanguageSelector';
 import { useState, useCallback } from 'react';
 import { SettingsIcon, SunIcon, MoonIcon } from '../icons/Icons';
 import Button from '../Button/Button';
@@ -22,6 +24,7 @@ const MainContent = ({
   showOnboardingTooltips = false,
   onTooltipsDismissed,
 }: MainContentProps) => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('home');
   const [tooltipStep, setTooltipStep] = useState<'card' | 'organize' | 'done'>(
     showOnboardingTooltips ? 'card' : 'done'
@@ -75,14 +78,15 @@ const MainContent = ({
           <h1 className="main-header-title">MarkMind</h1>
         </div>
         <div className="main-header-right">
+          <LanguageSelector />
           <Button
             variant="icon"
             onClick={onToggleTheme}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? t("Switch to light mode") : t("Switch to dark mode")}
           >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </Button>
-          <Button variant="icon" onClick={onOpenSettings} title="Settings">
+          <Button variant="icon" onClick={onOpenSettings} title={t("Settings")}>
             <SettingsIcon />
           </Button>
         </div>

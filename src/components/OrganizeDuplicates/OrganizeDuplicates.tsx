@@ -3,6 +3,7 @@ import { type DuplicateGroup } from '../../types/organize';
 import OrganizeCheckbox from '../OrganizeCheckbox/OrganizeCheckbox';
 import Button from '../Button/Button';
 import './OrganizeDuplicates.css';
+import { useI18n } from '../../i18n';
 
 interface OrganizeDuplicatesProps {
   groups: DuplicateGroup[];
@@ -10,6 +11,7 @@ interface OrganizeDuplicatesProps {
 }
 
 const OrganizeDuplicates = ({ groups, onRemove }: OrganizeDuplicatesProps) => {
+  const { t } = useI18n();
   // Which copy to keep per group, keyed by URL. Defaults to the first copy;
   // missing keys fall back so re-scans with new groups still work.
   const [keeperByUrl, setKeeperByUrl] = useState<Record<string, string>>({});
@@ -43,15 +45,13 @@ const OrganizeDuplicates = ({ groups, onRemove }: OrganizeDuplicatesProps) => {
 
   if (groups.length === 0) return null;
 
-  const bookmarkWord = removableCount === 1 ? 'bookmark' : 'bookmarks';
-
   return (
     <div className="organize-duplicates">
       <p className="organize-duplicates-title">
-        {removableCount} duplicate {bookmarkWord} to remove
+        {t(removableCount === 1 ? '{count} duplicate bookmark to remove' : '{count} duplicate bookmarks to remove', { count: removableCount })}
       </p>
       <p className="organize-duplicates-subtitle">
-        Pick the copy to keep in each group — the others are removed.
+        {t('Pick the copy to keep in each group — the others are removed.')}
       </p>
 
       <div className="organize-duplicates-list">
@@ -69,13 +69,13 @@ const OrganizeDuplicates = ({ groups, onRemove }: OrganizeDuplicatesProps) => {
                       variant="unstyled"
                       className={`organize-duplicates-copy${isKeeper ? ' is-keeper' : ''}`}
                       onClick={() => setKeeperId(group.url, bookmark.id)}
-                      title={isKeeper ? 'Kept' : 'Click to keep this copy'}
+                      title={isKeeper ? t('Kept') : t('Click to keep this copy')}
                     >
                       <OrganizeCheckbox state={isKeeper ? 'full' : 'empty'} />
                       <span className="organize-duplicates-location">
-                        {bookmark.currentFolderPath || 'Root'} — {bookmark.title || 'Untitled'}
+                        {bookmark.currentFolderPath || t('Root')} — {bookmark.title || t('Untitled')}
                       </span>
-                      {isKeeper && <span className="organize-duplicates-keep-tag">keep</span>}
+                      {isKeeper && <span className="organize-duplicates-keep-tag">{t('keep')}</span>}
                     </Button>
                   );
                 })}
@@ -88,20 +88,20 @@ const OrganizeDuplicates = ({ groups, onRemove }: OrganizeDuplicatesProps) => {
       {isConfirming ? (
         <div className="organize-duplicates-confirm">
           <p className="organize-duplicates-confirm-text">
-            Delete {removableCount} {bookmarkWord}? This can't be undone.
+            {t(removableCount === 1 ? "Delete {count} bookmark? This can't be undone." : "Delete {count} bookmarks? This can't be undone.", { count: removableCount })}
           </p>
           <div className="organize-duplicates-confirm-actions">
             <Button onClick={() => setIsConfirming(false)} disabled={isRemoving}>
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button variant="danger" onClick={handleRemove} disabled={isRemoving}>
-              {isRemoving ? 'Removing...' : `Yes, remove ${removableCount}`}
+              {isRemoving ? t('Removing...') : t('Yes, remove {count}', { count: removableCount })}
             </Button>
           </div>
         </div>
       ) : (
         <Button onClick={() => setIsConfirming(true)} fullWidth disabled={removableCount === 0}>
-          Remove {removableCount} duplicate {bookmarkWord}
+          {t(removableCount === 1 ? 'Remove {count} duplicate bookmark' : 'Remove {count} duplicate bookmarks', { count: removableCount })}
         </Button>
       )}
     </div>

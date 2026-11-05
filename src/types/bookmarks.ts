@@ -32,6 +32,9 @@ export interface ChromeBookmarkNode {
   dateAdded?: number;
   dateGroupModified?: number;
   unmodifiable?: string;
+  /** Firefox distinguishes separators from folders. Chromium may omit type. */
+  type?: 'bookmark' | 'folder' | 'separator';
+  folderType?: 'bookmarks-bar' | 'other' | 'mobile' | 'managed';
   children?: ChromeBookmarkNode[];
 }
 

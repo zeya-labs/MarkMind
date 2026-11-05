@@ -3,8 +3,16 @@ import { computeBatchSize, getBatchSize, splitFailedBatch, organizeBookmarks } f
 import { callProvider, getApiKey } from './providerUtils';
 import { type CompactBookmark } from '../../types/organize';
 import { createRetryableError } from '../../utils/helpers';
+import { setLanguage } from '../../i18n';
 
 vi.mock('./providerUtils', () => ({ callProvider: vi.fn(), getApiKey: vi.fn() }));
+
+// Locale-sensitive summaries must not depend on the host browser/OS language.
+beforeEach(async () => { await setLanguage('en'); });
+afterEach(async () => {
+  vi.unstubAllGlobals();
+  await setLanguage('en');
+});
 
 describe('computeBatchSize', () => {
   it('uses a safe fallback when the model limit is unknown', () => {
@@ -77,7 +85,7 @@ const fakeModel = (maxGoodBatch: number) =>
 
 describe('organizeBookmarks with a local provider', () => {
   beforeEach(() => {
-    vi.stubGlobal('chrome', { storage: { local: { get: vi.fn(async () => ({})) } } });
+    vi.stubGlobal('chrome', { storage: { local: { get: vi.fn(async () => ({})), set: vi.fn(async () => {}) } } });
     vi.mocked(getApiKey).mockResolvedValue('');
   });
 
@@ -103,6 +111,17 @@ describe('organizeBookmarks with a local provider', () => {
 
     expect(result.assignments).toHaveLength(8);
     expect(result.folderPlan.summary).toContain("7 couldn't be processed");
+  });
+
+  it('reports multi-pass progress and failures in the selected Chinese language', async () => {
+    await setLanguage('zh-CN');
+    vi.mocked(callProvider).mockImplementation(fakeModel(6));
+
+    const result = await organizeBookmarks('custom', 'qwen2.5:3b', makeBookmarks(15), '', {});
+
+    expect(result.folderPlan.summary).toContain('已将 8 条书签整理到 1 个文件夹。');
+    expect(result.folderPlan.summary).toContain('有 7 条书签未能处理');
+    expect(result.folderPlan.summary).not.toContain("couldn't be processed");
   });
 
   it('surfaces the real error when no piece succeeds', async () => {

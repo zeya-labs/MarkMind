@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import { type ApiKeyPanelHandlerDeps, type ApiKeyPanelStatusMessage } from '../types';
 import { fetchModelsForProvider } from '../../../services/ai/providerUtils';
 import { MODELS_CACHE_KEY_PREFIX } from '../../../config/services';
@@ -45,7 +46,7 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
     let shouldRollbackRequestedPermission = false;
 
     if (!currentService.validateKey(trimmedKey)) {
-      showButtonError(trimmedKey ? 'Invalid API key format' : 'Please enter an API key');
+      showButtonError(trimmedKey ? t('Invalid API key format') : t('Please enter an API key'));
       return;
     }
 
@@ -54,7 +55,7 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
         try {
           normalizedBaseUrl = normalizeCustomBaseUrl(baseUrlInput);
         } catch (error) {
-          showButtonError(error instanceof Error ? error.message : 'Invalid base URL format');
+          showButtonError(error instanceof Error ? t(error.message) : t('Invalid base URL format'));
           return;
         }
 
@@ -63,7 +64,7 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
 
         if (!permissionGranted) {
           setStatus({
-            message: 'Host access was not granted. Allow access to this endpoint to use the Custom provider.',
+            message: t('Host access was not granted. Allow access to this endpoint to use the Custom provider.'),
             type: 'error',
             showGoToApp: false,
           });
@@ -79,7 +80,7 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
         shouldRollbackRequestedPermission = requestedOriginPermission !== previousOriginPermission;
       }
 
-      showStatusMessage('Validating key & loading models...', 'loading');
+      showStatusMessage(t('Validating key & loading models...'), 'loading');
 
       // Fetching models validates the key implicitly — if the key is invalid, this throws.
       const models = await fetchModelsForProvider(currentService.id, trimmedKey, normalizedBaseUrl || undefined);
@@ -101,7 +102,7 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
         }
 
         setStatus({
-          message: 'Key accepted but no models found.',
+          message: t('Key accepted but no models found.'),
           type: 'default',
           showGoToApp: false,
         });
@@ -115,7 +116,7 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
       });
 
       setStatus({
-        message: `Key valid — ${models.length} models available! Select a model below.`,
+        message: t('Key valid — {count} models available! Select a model below.', { count: models.length }),
         type: 'success',
         showGoToApp: false,
       });
@@ -137,11 +138,11 @@ export const createHandleApiKeySave = (deps: HandleApiKeySaveDeps) => {
       }
 
       console.error('Failed to save or validate API key:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+      const errorMessage = error instanceof Error ? t(error.message) : t('Connection failed');
       setStatus({
         message: errorMessage.includes('401') || errorMessage.includes('403')
-          ? 'Invalid API key. Please check and try again.'
-          : `Validation failed: ${errorMessage}`,
+          ? t('Invalid API key. Please check and try again.')
+          : t('Validation failed: {message}', { message: t(errorMessage) }),
         type: 'error',
         showGoToApp: false,
       });

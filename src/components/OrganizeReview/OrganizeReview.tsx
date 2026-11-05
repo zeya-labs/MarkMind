@@ -6,6 +6,7 @@ import FolderTreeGroup from '../FolderTreeGroup/FolderTreeGroup';
 import OrganizeCheckbox from '../OrganizeCheckbox/OrganizeCheckbox';
 import Button from '../Button/Button';
 import './OrganizeReview.css';
+import { useI18n } from '../../i18n';
 
 interface OrganizeReviewProps {
   assignments: BookmarkAssignment[];
@@ -33,6 +34,7 @@ const OrganizeReview = ({
   onReOrganize,
   onReset,
 }: OrganizeReviewProps) => {
+  const { t } = useI18n();
   const approvedCount = useMemo(
     () => assignments.filter(assignment => assignment.isApproved).length,
     [assignments]
@@ -72,18 +74,21 @@ const OrganizeReview = ({
       )}
 
       <p className="organize-review-summary">
-        {assignments.length} bookmark{assignments.length !== 1 ? 's' : ''} assigned to {folderGroups.length} folder{folderGroups.length !== 1 ? 's' : ''}
+        {t('{bookmarks} assigned to {folders}', {
+          bookmarks: t(assignments.length === 1 ? '{count} bookmark' : '{count} bookmarks', { count: assignments.length }),
+          folders: t(folderGroups.length === 1 ? '{count} folder' : '{count} folders', { count: folderGroups.length }),
+        })}
       </p>
 
       {destinationLabel && (
         <p className="organize-review-summary">
-          All folders below are inside "{destinationLabel}"
+          {t('All folders below are inside "{folder}"', { folder: destinationLabel })}
         </p>
       )}
 
       <div className="organize-review-bulk-actions">
-        <Button onClick={onSelectAll}>Select All</Button>
-        <Button onClick={onDeselectAll}>Deselect All</Button>
+        <Button onClick={onSelectAll}>{t('Select All')}</Button>
+        <Button onClick={onDeselectAll}>{t('Deselect All')}</Button>
       </div>
 
       <div className="organize-review-list">
@@ -99,6 +104,7 @@ const OrganizeReview = ({
               variant="unstyled"
               className="organize-check-wrap"
               onClick={() => onToggleGroupAssignments(groupIds)}
+              title={t('Select bookmarks in {folder}', { folder: group.displayName })}
             >
               <OrganizeCheckbox state={isFullSelected ? 'full' : isPartialSelected ? 'partial' : 'empty'} />
             </Button>
@@ -109,7 +115,7 @@ const OrganizeReview = ({
               key={group.fullPath}
               groupName={group.displayName}
               itemCount={approvedInGroup}
-              badge={folderMeta?.isNew ? 'New' : undefined}
+              badge={folderMeta?.isNew ? t('New') : undefined}
               headerAction={groupCheckbox}
             >
               {folderMeta?.description && (
@@ -121,6 +127,7 @@ const OrganizeReview = ({
                   variant="unstyled"
                   className={`organize-review-item ${assignment.isApproved ? 'approved' : 'rejected'}`}
                   onClick={() => onToggleAssignment(assignment.bookmarkId)}
+                  title={t('Select {name}', { name: assignment.bookmarkTitle })}
                 >
                   <span className="organize-check-wrap">
                     <OrganizeCheckbox state={assignment.isApproved ? 'full' : 'empty'} />
@@ -140,14 +147,14 @@ const OrganizeReview = ({
           disabled={approvedCount === 0}
           fullWidth
         >
-          Apply {approvedCount} Move{approvedCount !== 1 ? 's' : ''}
+          {t(approvedCount === 1 ? 'Apply {count} Move' : 'Apply {count} Moves', { count: approvedCount })}
         </Button>
         <Button onClick={onReOrganize} fullWidth>
           <RefreshIcon />
-          Re-organize
+          {t('Re-organize')}
         </Button>
         <Button onClick={onReset} fullWidth>
-          Start Over
+          {t('Start Over')}
         </Button>
       </div>
     </div>

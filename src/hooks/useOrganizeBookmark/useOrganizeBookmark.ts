@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { buildLoadingMessage, getNextLoadingMessageIndex } from '../../utils/loadingMessages';
 import { type StatusType } from '../../types/common';
@@ -123,14 +124,14 @@ export const useOrganizeBookmark = (): UseOrganizeBookmarkReturn => {
       const serviceId = getSelectedServiceId();
 
       if (!serviceId) {
-        showStatus('Please select an AI provider first', 'error');
+        showStatus(t('Please select an AI provider first'), 'error');
         return;
       }
 
       const selectedModel = getSelectedModelId();
 
       if (!selectedModel) {
-        showStatus('Please select a model in Settings first', 'error');
+        showStatus(t('Please select a model in Settings first'), 'error');
         return;
       }
 
@@ -155,16 +156,16 @@ export const useOrganizeBookmark = (): UseOrganizeBookmarkReturn => {
       });
 
       if (folderId) {
-        showStatus(`Suggested: ${aiResponse.folderPath}`, 'default');
+        showStatus(t('Suggested: {path}', { path: aiResponse.folderPath }), 'default');
       } else if (aiResponse.isNewFolder) {
-        showStatus(`New folder: ${aiResponse.folderPath}`, 'default');
+        showStatus(t('New folder: {path}', { path: aiResponse.folderPath }), 'default');
       } else {
-        showStatus(`Folder not found: ${aiResponse.folderPath}`, 'error');
+        showStatus(t('Folder not found: {path}', { path: aiResponse.folderPath }), 'error');
       }
     } catch (error) {
       console.error('Error organizing page:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      showStatus(`Error: ${errorMessage}`, 'error');
+      const errorMessage = error instanceof Error ? t(error.message) : t('Unknown error');
+      showStatus(t('Error: {message}', { message: t(errorMessage) }), 'error');
     } finally {
       setIsOrganizing(false);
       clearLoadingMessages();
@@ -179,7 +180,7 @@ export const useOrganizeBookmark = (): UseOrganizeBookmarkReturn => {
       let targetFolderId = pendingSuggestion.folderId;
 
       if (pendingSuggestion.isNewFolder && !targetFolderId) {
-        showStatus(`Creating folder: ${pendingSuggestion.folderPath}`, 'default');
+        showStatus(t('Creating folder: {path}', { path: pendingSuggestion.folderPath }), 'default');
         targetFolderId = await createFolderPath(
           pendingSuggestion.folderPath,
           folderDataRef.current.pathToIdMap,
@@ -188,16 +189,16 @@ export const useOrganizeBookmark = (): UseOrganizeBookmarkReturn => {
       }
 
       if (!targetFolderId) {
-        showStatus('Could not determine target folder', 'error');
+        showStatus(t('Could not determine target folder'), 'error');
         return;
       }
 
       if (existingBookmarkId) {
-        showStatus('Moving bookmark...', 'default');
+        showStatus(t('Moving bookmark...'), 'default');
         await moveBookmark(existingBookmarkId, targetFolderId);
         setExistingBookmarkPath(pendingSuggestion.folderPath);
       } else {
-        showStatus('Saving bookmark...', 'default');
+        showStatus(t('Saving bookmark...'), 'default');
         await createBookmark(
           targetFolderId,
           pendingSuggestion.pageTitle,
@@ -206,11 +207,11 @@ export const useOrganizeBookmark = (): UseOrganizeBookmarkReturn => {
       }
 
       setPendingSuggestion(null);
-      showStatus(existingBookmarkId ? 'Bookmark moved!' : 'Bookmark saved!', 'success');
+      showStatus(existingBookmarkId ? t('Bookmark moved!') : t('Bookmark saved!'), 'success');
     } catch (error) {
       console.error('Error saving bookmark:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      showStatus(`Error: ${errorMessage}`, 'error');
+      const errorMessage = error instanceof Error ? t(error.message) : t('Unknown error');
+      showStatus(t('Error: {message}', { message: t(errorMessage) }), 'error');
     } finally {
       setIsOrganizing(false);
     }
@@ -218,7 +219,7 @@ export const useOrganizeBookmark = (): UseOrganizeBookmarkReturn => {
 
   const handleDeclineSuggestion = useCallback((): void => {
     setPendingSuggestion(null);
-    showStatus('Suggestion declined', 'default');
+    showStatus(t('Suggestion declined'), 'default');
   }, [showStatus]);
 
   return {

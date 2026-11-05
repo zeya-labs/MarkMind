@@ -11,6 +11,7 @@ import TreeNode from '../TreeNode/TreeNode';
 import Button from '../Button/Button';
 import Dropdown from '../Dropdown/Dropdown';
 import './OrganizeScan.css';
+import { useI18n } from '../../i18n';
 
 const NO_DESTINATION_ID = '';
 
@@ -37,6 +38,7 @@ const OrganizeScan = ({
   onStartPlanning,
   onRemoveDuplicates,
 }: OrganizeScanProps) => {
+  const { t, language } = useI18n();
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [showDuplicates, setShowDuplicates] = useState(false);
 
@@ -64,16 +66,13 @@ const OrganizeScan = ({
 
   const selectedCount = selectedSet.size;
 
-  const destinationOptions = useMemo(
-    () => [
-      { id: NO_DESTINATION_ID, label: 'Any folder (default)' },
-      ...(session.destinationFolders ?? []).map(folder => ({
-        id: folder.id,
-        label: formatDestinationLabel(folder.path),
-      })),
-    ],
-    [session.destinationFolders]
-  );
+  const destinationOptions = [
+    { id: NO_DESTINATION_ID, label: t('Any folder (default)') },
+    ...(session.destinationFolders ?? []).map(folder => ({
+      id: folder.id,
+      label: formatDestinationLabel(folder.path),
+    })),
+  ];
   const destinationLabel = destinationOptions.find(
     option => option.id !== NO_DESTINATION_ID && option.id === session.destinationFolderId
   )?.label;
@@ -93,7 +92,7 @@ const OrganizeScan = ({
       <div className="organize-scan">
         <OrganizeStatusView
           icon={<SpinnerIcon width={20} height={20} />}
-          title="Scanning your bookmarks..."
+          title={t('Scanning your bookmarks...')}
         />
       </div>
     );
@@ -105,21 +104,21 @@ const OrganizeScan = ({
         <div className="organize-scan-stats">
           <div className="organize-scan-stats-header">
             <p className="organize-scan-stats-summary">
-              Found {bookmarkStats.totalBookmarks} bookmarks in {bookmarkStats.totalFolders} folders
+              {t('Found {bookmarks} bookmarks in {folders} folders', { bookmarks: bookmarkStats.totalBookmarks, folders: bookmarkStats.totalFolders })}
             </p>
             <Button
               variant="unstyled"
               className="organize-scan-rescan-btn"
               onClick={onStartScan}
-              title="Re-scan to get the latest bookmark data"
+              title={t('Re-scan to get the latest bookmark data')}
             >
               <RefreshIcon width={12} height={12} />
             </Button>
           </div>
 
           <div className="organize-scan-bulk-actions">
-            <Button onClick={onSelectAll}>Select All</Button>
-            <Button onClick={onDeselectAll}>Deselect All</Button>
+            <Button onClick={onSelectAll}>{t('Select All')}</Button>
+            <Button onClick={onDeselectAll}>{t('Deselect All')}</Button>
           </div>
 
           {duplicateCount > 0 && (
@@ -128,7 +127,9 @@ const OrganizeScan = ({
               fullWidth
               onClick={() => setShowDuplicates(previous => !previous)}
             >
-              {showDuplicates ? 'Hide' : 'Review'} {duplicateCount} duplicate {duplicateCount === 1 ? 'bookmark' : 'bookmarks'}
+              {showDuplicates
+                ? t(duplicateCount === 1 ? 'Hide {count} duplicate bookmark' : 'Hide {count} duplicate bookmarks', { count: duplicateCount })
+                : t(duplicateCount === 1 ? 'Review {count} duplicate bookmark' : 'Review {count} duplicate bookmarks', { count: duplicateCount })}
             </Button>
           )}
 
@@ -153,21 +154,21 @@ const OrganizeScan = ({
 
         {isLargeSelection && (
           <p className="organize-scan-heads-up">
-            You've selected {selectedCount.toLocaleString()} bookmarks. Organizing this many can take a few minutes — you can also do it in smaller groups.
+            {t("You've selected {count} bookmarks. Organizing this many can take a few minutes — you can also do it in smaller groups.", { count: selectedCount.toLocaleString(language) })}
           </p>
         )}
 
         <div className="organize-scan-destination">
           <Dropdown
-            label="Move organized bookmarks into"
+            label={t('Move organized bookmarks into')}
             options={destinationOptions}
             selectedId={destinationLabel ? session.destinationFolderId ?? NO_DESTINATION_ID : NO_DESTINATION_ID}
             onSelect={onSelectDestination}
           />
           <p className="organize-scan-destination-hint">
             {destinationLabel
-              ? `New folders are created inside "${destinationLabel}". Only the bookmarks you selected above move; everything else stays where it is.`
-              : 'MarkMind picks the best folder anywhere in your bookmarks. Only the bookmarks you selected above move.'}
+              ? t('New folders are created inside "{folder}". Only the bookmarks you selected above move; everything else stays where it is.', { folder: destinationLabel })
+              : t('MarkMind picks the best folder anywhere in your bookmarks. Only the bookmarks you selected above move.')}
           </p>
         </div>
 
@@ -177,7 +178,7 @@ const OrganizeScan = ({
           disabled={selectedCount === 0}
           fullWidth
         >
-          Organize Selected ({selectedCount})
+          {t('Organize Selected ({count})', { count: selectedCount })}
         </Button>
       </div>
     );
@@ -189,12 +190,12 @@ const OrganizeScan = ({
         <div className="organize-scan-intro-icon">
           <FolderIcon width={20} height={20} />
         </div>
-        <p className="organize-scan-intro-title">Time to tidy up</p>
+        <p className="organize-scan-intro-title">{t('Time to tidy up')}</p>
         <p className="organize-scan-intro-description">
-          We'll analyze your bookmarks and organize them into the perfect folder structure for you.
+          {t("We'll analyze your bookmarks and organize them into the perfect folder structure for you.")}
         </p>
         <Button variant="primary" onClick={onStartScan} fullWidth>
-          Scan My Bookmarks
+          {t('Scan My Bookmarks')}
         </Button>
       </div>
     </div>

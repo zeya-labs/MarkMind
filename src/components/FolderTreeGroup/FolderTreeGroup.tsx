@@ -1,6 +1,6 @@
-import { useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback, useId, type ReactNode } from 'react';
 import { ArrowRightIcon } from '../icons/Icons';
-import Button from '../Button/Button';
+import { useI18n } from '../../i18n';
 import './FolderTreeGroup.css';
 
 interface FolderTreeGroupProps {
@@ -20,6 +20,8 @@ const FolderTreeGroup = ({
   children,
   defaultExpanded = false,
 }: FolderTreeGroupProps) => {
+  const { t } = useI18n();
+  const contentId = useId();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const handleToggleExpand = useCallback(() => {
@@ -28,31 +30,34 @@ const FolderTreeGroup = ({
 
   return (
     <div className="folder-tree-group">
-      <Button
-        variant="unstyled"
-        className="folder-tree-group-header"
-        onClick={handleToggleExpand}
-      >
-        <span className={`folder-tree-chevron ${isExpanded ? 'expanded' : ''}`}>
-          <ArrowRightIcon width={10} height={10} />
-        </span>
-        <span className="folder-tree-group-name">{groupName}</span>
-        {badge && <span className="folder-tree-group-badge">{badge}</span>}
+      <div className="folder-tree-group-header">
+        <button
+          type="button"
+          className="folder-tree-group-toggle"
+          onClick={handleToggleExpand}
+          aria-expanded={isExpanded}
+          aria-controls={contentId}
+          title={t(isExpanded ? 'Collapse {name}' : 'Expand {name}', { name: groupName })}
+        >
+          <span className={`folder-tree-chevron ${isExpanded ? 'expanded' : ''}`}>
+            <ArrowRightIcon width={10} height={10} />
+          </span>
+          <span className="folder-tree-group-name">{groupName}</span>
+          {badge && <span className="folder-tree-group-badge">{badge}</span>}
+        </button>
         {headerAction && (
-          <span className="folder-tree-group-action" onClick={event => event.stopPropagation()}>
+          <span className="folder-tree-group-action">
             {headerAction}
           </span>
         )}
         <span className="folder-tree-group-count">
           {itemCount}
         </span>
-      </Button>
+      </div>
 
-      {isExpanded && (
-        <div className="folder-tree-group-children">
-          {children}
-        </div>
-      )}
+      <div id={contentId} className="folder-tree-group-children" hidden={!isExpanded}>
+        {isExpanded && children}
+      </div>
     </div>
   );
 };

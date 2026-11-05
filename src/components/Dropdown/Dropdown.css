@@ -39,6 +39,11 @@
   border-color: var(--color-text-muted);
 }
 
+.dropdown-trigger:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+}
+
 .dropdown-trigger.placeholder .dropdown-trigger-text {
   color: var(--color-text-light);
 }
@@ -114,8 +119,14 @@
   text-align: left;
 }
 
-.dropdown-option:hover {
+.dropdown-option:hover,
+.dropdown-option:focus-visible {
   background-color: var(--color-surface);
+}
+
+.dropdown-option:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: -2px;
 }
 
 .dropdown-option.selected {

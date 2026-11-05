@@ -42,7 +42,9 @@ beforeEach(async () => {
   vi.stubGlobal('chrome', {
     storage: {
       local: {
-        get: vi.fn(async (keys: string[]) => Object.fromEntries(keys.map(key => [key, storage[key]]))),
+        get: vi.fn(async (keys: string | string[]) => Object.fromEntries(
+          (Array.isArray(keys) ? keys : [keys]).map(key => [key, storage[key]])
+        )),
         set: vi.fn(async (values: Record<string, unknown>) => { Object.assign(storage, values); }),
         remove: vi.fn(async () => {}),
       },
@@ -106,6 +108,7 @@ describe('background organize run', () => {
     });
 
     sendToBackground({ type: 'START_ORGANIZE', payload: START_PAYLOAD });
+    await flush();
     sendToBackground({ type: 'START_ORGANIZE', payload: START_PAYLOAD });
     await flush();
 

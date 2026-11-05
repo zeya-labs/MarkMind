@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import {
   SparklesIcon,
   SettingsIcon,
@@ -19,6 +20,7 @@ interface DiscoverCardProps {
 }
 
 const DiscoverCard = ({ card }: DiscoverCardProps) => {
+  const { t } = useI18n();
   const CardIcon = CARD_ICONS[card.iconName];
 
   return (
@@ -29,12 +31,12 @@ const DiscoverCard = ({ card }: DiscoverCardProps) => {
       <div className="discover-card-content">
         <div className="discover-card-meta">
           <span className={`discover-card-badge discover-card-badge-${card.badgeType}`}>
-            {card.badgeLabel}
+            {t(card.badgeLabel)}
           </span>
-          {card.date && <span className="discover-card-date">{card.date}</span>}
+          {card.date && <span className="discover-card-date">{t(card.date)}</span>}
         </div>
-        <h3 className="discover-card-title">{card.title}</h3>
-        <p className="discover-card-description">{card.description}</p>
+        <h3 className="discover-card-title">{t(card.title)}</h3>
+        <p className="discover-card-description">{t(card.description)}</p>
       </div>
     </div>
   );

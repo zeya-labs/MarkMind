@@ -1,205 +1,172 @@
-# MarkMind - AI-Powered Bookmark Organization
+# MarkMind — Firefox and Chinese language fork
 
-<div align="center">
-  <img src="./assets/readme/logo.png" alt="MarkMind Logo" width="128" height="128">
-  <h3>Transform your chaotic bookmarks into organized bliss with AI</h3>
-  <p>
-    <a href="https://chromewebstore.google.com/detail/MarkMind/bdobgdkpeffdbonfpokgkbncgnbnjnoo">
-      <img src="https://img.shields.io/badge/Chrome-Add%20to%20Chrome-green" alt="Chrome Web Store">
-    </a>
-    <a href="https://github.com/migsilva89/MarkMind/issues">
-      <img src="https://img.shields.io/github/issues/migsilva89/MarkMind" alt="Issues">
-    </a>
-    <a href="https://github.com/migsilva89/MarkMind/blob/main/LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-    </a>
-    <a href="https://buymeacoffee.com/migsilva?utm_source=github-markmind">
-      <img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-FFDD00" alt="Buy me a coffee">
-    </a>
-  </p>
+[简体中文](README.zh-CN.md) · [Privacy / 隐私说明](PRIVACY.md) · [Upstream project](https://github.com/migsilva89/MarkMind)
 
-  <a href="https://www.youtube.com/watch?v=9I5tpjMDrIQ">
-    <img src="https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube">
-  </a>
-</div>
+<img src="./assets/readme/logo.png" alt="MarkMind logo" width="96" height="96">
 
----
+This fork of [migsilva89/MarkMind](https://github.com/migsilva89/MarkMind) adds a Firefox build and an English / Simplified Chinese interface. The original MarkMind project and design are by [migsilva89](https://github.com/migsilva89).
 
-## Why MarkMind?
+## What changes in 2.1.0
 
-MarkMind uses AI to understand what you're saving and automatically organizes your bookmarks into the right folders. One click and your bookmarks find their perfect home.
+- Separate browser packages: Chromium uses Manifest V3 with a service worker; Firefox uses Manifest V2 with a persistent module background page so long AI requests continue when the popup closes.
+- Firefox bookmark roots, read-only system folders, and separators are handled without treating them as ordinary destination folders.
+- An always-available language selector: follow the browser, English, or Simplified Chinese. The choice is saved in extension-local storage.
+- Settings, onboarding, scan, review, duplicate cleanup, progress, and common errors are translated.
+- AI requests ask for new folder names, descriptions, and summaries in the selected language. Existing folder names, bookmark titles, URLs, and IDs remain unchanged.
+- Existing providers remain supported: Gemini, OpenAI, Anthropic, OpenRouter, and custom OpenAI-compatible endpoints such as Ollama and LM Studio.
 
-<div align="center">
-  <img src="./assets/readme/demo.gif" alt="MarkMind Demo - Organize current page" width="400">
-  <p><em>One click to organize the page you're visiting</em></p>
-</div>
+## Browser support and installation
 
-### Key Features
+| Browser | Build | Installation |
+| --- | --- | --- |
+| Firefox desktop 140 or later | dist/firefox | Temporary add-on loading; see below |
+| Chrome / Chromium / Edge | dist/chromium | Developer mode, Load unpacked |
 
-- **Smart Organization** - AI analyzes page content and suggests the best folder
-- **Bulk Processing** - Organize hundreds (or thousands) of bookmarks at once
-- **Handles Loose Bookmarks** - Bookmarks scattered outside folders are organized too, not just ones already in folders
-- **Duplicate Cleanup** - Finds bookmarks saved more than once and lets you remove the extras
-- **Live Progress** - See exactly how many bookmarks have been organized while it works
-- **Multiple AI Providers** - Google Gemini, OpenAI, Anthropic, or OpenRouter
-- **Privacy First** - Your bookmarks stay in your browser, only titles/URLs are sent to the AI
-- **Review Before Apply** - Always review and approve changes before they happen
-- **Works With Your Structure** - Respects your existing bookmark folders
+Firefox continues to support Manifest V2 alongside Manifest V3. The persistent background page is intentional: long-running AI requests must remain active while the popup is closed. See [Mozilla's extension platform explanation](https://blog.mozilla.org/en/firefox/firefox-manifest-v3-adblockers/) and the [background manifest reference](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background).
 
-## See It In Action
+**This fork is not published on Mozilla Add-ons and its Firefox package is not Mozilla-signed.** The upstream Chrome Web Store listing belongs to the original project; it does not install this fork's changes.
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center" width="33%">
-        <img src="./assets/readme/bulk.gif" alt="Bulk organize bookmarks" width="260">
-        <br>
-        <strong>Bulk Organize</strong>
-        <br>
-        <em>Scan and sort hundreds of bookmarks at once</em>
-      </td>
-      <td align="center" width="33%">
-        <img src="./assets/readme/control.gif" alt="Review AI suggestions" width="260">
-        <br>
-        <strong>You're In Control</strong>
-        <br>
-        <em>Review every AI suggestion before it's applied</em>
-      </td>
-      <td align="center" width="33%">
-        <img src="./assets/readme/private.gif" alt="Privacy and settings" width="260">
-        <br>
-        <strong>Private & Secure</strong>
-        <br>
-        <em>Your API key stays local, your data never leaves your browser</em>
-      </td>
-    </tr>
-  </table>
-</div>
+### Firefox: load the current unsigned build
 
-## Getting Started
+1. Download the Firefox ZIP from this fork's release, or build it locally.
+2. Extract the ZIP to a directory you will keep.
+3. Open Firefox and visit about:debugging#/runtime/this-firefox.
+4. Choose **Load Temporary Add-on**, then select manifest.json inside the extracted directory. When building locally, choose dist/firefox/manifest.json.
+5. Open MarkMind from the extensions menu and select your language and provider.
 
-### Install from Chrome Web Store
+Temporary installation lasts until Firefox restarts. After a restart, load the same manifest again. This is a testing / development installation, not a permanent signed installation. Permanent installation on standard Firefox requires submission to Mozilla for signing; this fork has not completed that process. See Mozilla's [temporary installation](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/) and [signing documentation](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/).
 
-1. [Add MarkMind from the Chrome Web Store](https://chromewebstore.google.com/detail/markmind/bdobgdkpeffdbonfpokgkbncgnbnjnoo)
-2. Click the MarkMind icon and choose your AI provider
-3. Enter your API key (get a free one from [Google AI Studio](https://aistudio.google.com/app/apikey))
-4. Start organizing!
+### Chromium / Edge: load the build
 
-### Using MarkMind
+1. Open chrome://extensions or edge://extensions.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked** and select dist/chromium.
 
-**Add Current Page:**
+## Organize existing bookmarks
 
-1. Navigate to any page
-2. Click the MarkMind icon
-3. Hit "Organize" - AI suggests the best folder
-4. Accept, decline, or customize the suggestion
+1. Export a backup using your browser's bookmark manager.
+2. Open MarkMind → **Organize** and scan your bookmarks.
+3. Optionally review duplicate groups. Duplicate deletion is permanent in MarkMind; it does not provide an undo or complete backup.
+4. Select the bookmarks to organize, including loose bookmarks outside folders.
+5. Optionally choose a destination folder to keep the result inside that subtree.
+6. Run the AI analysis, review the proposed destinations, and accept only the moves you want.
+7. Apply the approved moves.
 
-**Bulk Organize:**
+Analysis alone does not move bookmarks. Applying a plan moves the original bookmarks rather than making copies. If a move fails, previously completed moves are not automatically rolled back. Start with a small selection to check whether the proposed categories fit your collection.
 
-1. Click the MarkMind icon → Organize tab
-2. Scan your bookmarks
-3. (Optional) Review and remove any duplicate bookmarks found
-4. Select bookmarks to organize — loose bookmarks outside folders are included
-5. Review AI suggestions and apply
+You may close the popup while Firefox analyzes bookmarks and reopen it to see progress. Keep Firefox running and leave the extension enabled until the job finishes. Closing the browser or reloading the extension interrupts an active request; this is not a durable job that continues after the browser exits.
 
-### What to Expect
+Bulk analysis uses bookmark titles, URLs, current folder paths, and folder context. It does not fetch and read every bookmarked page. Single-page analysis can additionally use the current page's description and main heading.
 
-- **How long does it take?** Usually seconds to a minute. Large collections are processed in several passes and can take a few minutes — you'll see a live "Organized X of Y bookmarks" count and a timer the whole time, so you always know it's working. Feel free to close the popup; it keeps going in the background.
-- **Free AI providers:** Free tiers (e.g. free Gemini models) have stricter limits and can be briefly unavailable. MarkMind automatically retries, sizes the work to fit your model, and tells you in plain language if something needs another try. If a large run struggles, organizing in smaller groups helps.
-- **Scattered bookmarks:** Bookmarks that aren't in any folder are picked up and organized along with the rest.
-- **Duplicates:** After scanning, MarkMind shows any bookmarks saved more than once and lets you remove the extras (it always keeps one copy).
+## Language settings
 
-## Supported AI Providers
+The language selector is available before provider setup, including on onboarding screens.
 
-| Provider | Get API Key |
-| -------- | ----------- |
-| Google Gemini | [Google AI Studio](https://aistudio.google.com/app/apikey) |
+- **Follow browser / auto**: Chinese browser locales use Simplified Chinese; other locales use English.
+- **English / en** and **简体中文 / zh-CN**: explicit choices saved locally.
+- New AI-generated names and prose follow the selected language. Existing bookmark names and folder paths are preserved.
+- Raw messages returned by external services may remain in their original language.
+
+## AI providers
+
+Choose a provider, enter its API key, load the available models, and select a model. API usage and available free quotas are determined by that provider; MarkMind does not include paid AI credits.
+
+| Provider | API key |
+| --- | --- |
+| Google Gemini | [Google AI Studio](https://aistudio.google.com/apikey) |
 | OpenAI | [OpenAI Platform](https://platform.openai.com/api-keys) |
 | Anthropic | [Anthropic Console](https://console.anthropic.com/) |
 | OpenRouter | [OpenRouter](https://openrouter.ai/keys) |
-| Custom (OpenAI-compatible, e.g. Ollama, LM Studio) | Not needed for local models |
+| Custom OpenAI-compatible endpoint | Depends on the server; local servers can use an empty key |
 
-### Using a local model (Ollama, LM Studio)
+### Ollama and LM Studio
 
-1. In Settings, pick **Custom** and enter the server's base URL — `http://127.0.0.1:11434/v1` for Ollama, `http://127.0.0.1:1234/v1` for LM Studio. Leave the API key empty.
-2. Chrome asks to let MarkMind reach that address — allow it.
-3. **Ollama blocks browser extensions by default.** The model list still loads, but organizing fails with a 403 until you start Ollama with:
-   ```bash
-   OLLAMA_ORIGINS="chrome-extension://*" ollama serve
-   ```
-   (On the macOS app: `launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"`, then restart Ollama.)
-4. In LM Studio, if requests are refused, turn on **Enable CORS** in the server settings.
+In Settings, choose **Custom**. Set the base URL to http://127.0.0.1:11434/v1 for Ollama or http://127.0.0.1:1234/v1 for LM Studio. Leave the key empty if your local server does not require one. Grant the extension access to that endpoint when the browser asks.
 
-Local models run on your machine, so they're slower than cloud ones. MarkMind sends them small groups of bookmarks and waits longer for each one. Very small models (around 3B) work, but their folder names can be uneven.
+If Ollama rejects extension-origin requests with 403, configure its OLLAMA_ORIGINS environment variable to allow the extension's origin and restart Ollama. For development across both browser families:
 
-## Privacy & Security
+~~~text
+OLLAMA_ORIGINS=chrome-extension://*,moz-extension://*
+~~~
 
-- Bookmarks never leave your browser (only titles/URLs sent to AI for analysis)
-- API keys stored securely in Chrome's local storage
-- No personal data collected or tracked
-- No analytics, no telemetry
-- Open source - verify the code yourself
+In LM Studio, enable CORS if the local server rejects browser requests. Use HTTPS for remote endpoints; the extension permits plain HTTP only for loopback addresses. Local models receive smaller batches and longer timeouts, but speed and classification quality depend on the model and hardware.
 
-## For Developers
+## Data and privacy
 
-### Tech Stack
+AI analysis sends selected bookmark information and folder context directly to the provider you configure. API keys are sent to that provider for authentication. Settings, keys, cached model lists, and organize sessions are stored in browser-local extension storage, which is **not an encrypted password vault**.
 
-- **React 19** + **TypeScript**
-- **Vite** with @crxjs/vite-plugin
-- **Chrome Manifest V3**
-- **CSS** with design tokens
+This fork has no analytics or telemetry service and no MarkMind account or server. Provider data handling still applies, and browser / website resource requests are separate from AI requests. Read [PRIVACY.md](PRIVACY.md) before using private bookmarks or confidential page content.
 
-### Local Development
+## Build and verify
 
-```bash
-git clone https://github.com/migsilva89/MarkMind.git
+Use Node.js 22 and npm. From a fresh checkout:
+
+~~~bash
+git clone https://github.com/zeya-labs/MarkMind.git
 cd MarkMind
-npm install
-npm run dev       # Dev server with HMR
-npm run build     # Production build → dist/
-```
+npm ci
+npm run lint
+npm test
+npm run build
+npm run lint:firefox
+npm run package:firefox
+~~~
 
-Load the extension:
+Build outputs:
 
-1. Go to `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked" → Select `dist/`
+- dist/chromium: unpacked Chromium / Edge extension.
+- dist/firefox: unpacked Firefox extension, including manifest.json.
+- artifacts/markmind-firefox-2.1.0.zip: unsigned Firefox package.
 
-### Project Structure
+For development, npm run dev serves the Chromium extension. npm run build:firefox rebuilds only the Firefox target. A GitHub Actions template is included at tools/github-actions-ci.yml for lint, unit tests, both builds, validation, and packaging. It is not enabled: the publishing credential did not have the workflow scope. To enable it, copy the template to .github/workflows/ci.yml using credentials with workflow access. Its artifact remains unsigned.
 
-```text
-src/
-├── components/      # React components (one per file)
-├── hooks/           # Custom hooks (folder per hook)
-├── services/        # Chrome API & AI provider wrappers
-├── config/          # Configuration data
-├── types/           # TypeScript interfaces
-├── utils/           # Utility functions
-├── styles/          # Design tokens (CSS variables)
-└── App.tsx          # Root component
-```
+### Real Firefox test
 
-### Contributing
+After building, run:
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+~~~bash
+npm run test:firefox
+~~~
 
-## Support
+The test uses headless Firefox, an independent temporary browser profile, fixture bookmarks, and a local mock AI endpoint. It checks Chinese startup, native bookmark scanning, scoped organization, keeping analysis alive with the popup closed, review before moving, preserved titles, and English preference persistence. It does not call a live AI provider or use personal API keys. Results and screenshots are written under test-results/.
 
-- [Open an issue](https://github.com/migsilva89/MarkMind/issues) on GitHub
-- Email: <themarkmind@gmail.com>
-- Website: [markmind.xyz](https://markmind.xyz)
-- Like it? [Buy me a coffee](https://buymeacoffee.com/migsilva?utm_source=github-markmind) — it keeps the next release coming
+Firefox and a compatible geckodriver must be available. Set FIREFOX_BINARY and GECKODRIVER when they cannot be discovered automatically. To exercise an AI response longer than 60 seconds, set FIREFOX_AI_DELAY_MS=65000. For example, in PowerShell:
+
+~~~powershell
+$env:FIREFOX_AI_DELAY_MS = '65000'
+npm run test:firefox
+Remove-Item Env:FIREFOX_AI_DELAY_MS
+~~~
+
+The CI template does not run this Selenium test; it runs the portable verification and packaging commands above.
+
+### Validation and dependency notes
+
+npm run lint:firefox runs tools/lint-firefox.mjs. It rejects all errors and unexpected warnings. The only allowlist is UNSAFE_VAR_ASSIGNMENT warnings in the isolated React vendor chunk: the current build has two generic innerHTML warnings from React DOM. Application-code warnings are not allowlisted. A passing result therefore does not mean the raw web-ext report has zero warnings.
+
+This version uses Vite 6.4.4, including its security fixes. The production dependency audit for the delivery lockfile reports zero vulnerabilities; development tooling still has moderate / low audit findings. Run npm audit --omit=dev and npm audit to inspect the current reports rather than assuming the entire development dependency tree is clean.
+
+### Project layout
+
+~~~text
+src/components/          React interface
+src/hooks/               UI and organize workflow state
+src/i18n/                language preferences and translation dictionaries
+src/services/            bookmark operations, sessions, AI providers
+src/utils/               browser-root handling and common helpers
+public/_locales/         native extension name / description translations
+vite.firefox.config.ts  Firefox-specific build and manifest
+~~~
+
+## Credits and support
+
+- Original project: [migsilva89/MarkMind](https://github.com/migsilva89/MarkMind).
+- Original website: [markmind.xyz](https://markmind.xyz).
+- Support the upstream author: [Buy me a coffee](https://buymeacoffee.com/migsilva?utm_source=github-markmind).
+- Firefox / language fork issues: [zeya-labs/MarkMind](https://github.com/zeya-labs/MarkMind/issues).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-<div align="center">
-  <p>If you find MarkMind useful, consider <a href="https://github.com/migsilva89/MarkMind">giving it a star</a></p>
-</div>
+The upstream license declaration above is preserved. This fork does not create a replacement license file.

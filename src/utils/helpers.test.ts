@@ -10,7 +10,19 @@ import {
   isRetryableError,
   formatElapsedTime,
   fetchWithTimeout,
+  isHeadingSimilarToTitle,
 } from './helpers';
+
+describe('Unicode page heading comparison', () => {
+  it('recognizes matching Chinese text without discarding it', () => {
+    expect(isHeadingSimilarToTitle('浏览器书签管理', '浏览器书签管理')).toBe(true);
+    expect(isHeadingSimilarToTitle('浏览器书签管理', '完全不同的文章')).toBe(false);
+  });
+
+  it('still compares whitespace-separated Latin words', () => {
+    expect(isHeadingSimilarToTitle('A guide to Firefox bookmarks', 'Firefox bookmarks')).toBe(true);
+  });
+});
 
 describe('chunkArray', () => {
   it('splits into chunks of the given size', () => {

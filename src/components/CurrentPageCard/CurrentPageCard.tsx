@@ -6,6 +6,7 @@ import { isHeadingSimilarToTitle } from '../../utils/helpers';
 import Button from '../Button/Button';
 import BookmarkTreePath from '../BookmarkTreePath/BookmarkTreePath';
 import './CurrentPageCard.css';
+import { useI18n } from '../../i18n';
 
 interface CurrentPageCardProps {
   currentPage: PageMetadata | null;
@@ -34,6 +35,7 @@ const CurrentPageCard = ({
   onAccept,
   onDecline,
 }: CurrentPageCardProps) => {
+  const { t } = useI18n();
   const shouldShowH1 = currentPage?.h1
     && !isHeadingSimilarToTitle(currentPage.title, currentPage.h1);
   const isAlreadyBookmarked = !!existingBookmarkPath && !pendingSuggestion;
@@ -49,7 +51,7 @@ const CurrentPageCard = ({
         )}
       </div>
       <span className="current-page-card-label">
-        {existingBookmarkPath ? 'Already bookmarked' : "You're visiting"}
+        {existingBookmarkPath ? t('Already bookmarked') : t("You're visiting")}
       </span>
     </div>
 
@@ -61,7 +63,7 @@ const CurrentPageCard = ({
       </div>
     ) : !currentPage ? (
       <div className="current-page-card-body">
-        <p className="current-page-card-error">Could not load page information</p>
+        <p className="current-page-card-error">{t('Could not load page information')}</p>
       </div>
     ) : (
       <>
@@ -89,7 +91,7 @@ const CurrentPageCard = ({
             folderPath={existingBookmarkPath}
             bookmarkTitle={currentPage.title}
             isNewFolder={false}
-            label="Already saved in"
+            label={t('Already saved in')}
             defaultExpanded={false}
           />
         )}
@@ -112,12 +114,12 @@ const CurrentPageCard = ({
                 {isOrganizing ? (
                   <>
                     <SpinnerIcon />
-                    {existingBookmarkId ? 'Moving...' : 'Saving...'}
+                    {existingBookmarkId ? t('Moving...') : t('Saving...')}
                   </>
                 ) : (
                   <>
                     <CheckIcon />
-                    Accept
+                    {t('Accept')}
                   </>
                 )}
               </Button>
@@ -128,7 +130,7 @@ const CurrentPageCard = ({
                 fullWidth
               >
                 <XIcon />
-                Decline
+                {t('Decline')}
               </Button>
             </div>
           ) : (
@@ -142,12 +144,12 @@ const CurrentPageCard = ({
               {isOrganizing ? (
                 <>
                   <SpinnerIcon />
-                  {statusMessage || 'Analyzing...'}
+                  {statusMessage || t('Analyzing...')}
                 </>
               ) : isAlreadyBookmarked ? (
-                'Re-organize'
+                t('Re-organize')
               ) : (
-                'Organize this page'
+                t('Organize this page')
               )}
             </Button>
           )}
