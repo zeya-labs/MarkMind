@@ -19,14 +19,24 @@ This fork of [migsilva89/MarkMind](https://github.com/migsilva89/MarkMind) adds 
 
 | Browser | Build | Installation |
 | --- | --- | --- |
-| Firefox desktop 140 or later | dist/firefox | Temporary add-on loading; see below |
+| Firefox desktop 140 or later | Signed XPI from Releases | Install from file; stays installed after restart |
 | Chrome / Chromium / Edge | dist/chromium | Developer mode, Load unpacked |
 
 Firefox continues to support Manifest V2 alongside Manifest V3. The persistent background page is intentional: long-running AI requests must remain active while the popup is closed. See [Mozilla's extension platform explanation](https://blog.mozilla.org/en/firefox/firefox-manifest-v3-adblockers/) and the [background manifest reference](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background).
 
-**This fork is not published on Mozilla Add-ons and its Firefox package is not Mozilla-signed.** The upstream Chrome Web Store listing belongs to the original project; it does not install this fork's changes.
+**The release provides a Mozilla-signed Firefox XPI for self-distribution on GitHub. It is not publicly listed on Mozilla Add-ons (AMO).** The upstream Chrome Web Store listing belongs to the original project; it does not install this fork's changes.
 
-### Firefox: load the current unsigned build
+### Firefox: install the signed release (recommended)
+
+1. Download [markmind-firefox-2.1.0-signed.xpi](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi) from the [v2.1.0 release](https://github.com/zeya-labs/MarkMind/releases/tag/v2.1.0). Do not extract the XPI.
+2. Open about:addons in Firefox.
+3. Open the gear menu and choose **Install Add-on From File…**.
+4. Select the signed XPI, review Firefox's permission prompt, and confirm installation.
+5. Open MarkMind from the extensions menu and select your language and provider.
+
+The signed installation remains after Firefox restarts. Signing does not mean the extension has a public AMO listing. The signature applies to this exact release package: local builds and changed code need a separate Mozilla signature before permanent installation. See Mozilla's [signing documentation](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/).
+
+### Firefox: temporarily load an unsigned development build
 
 1. Download the Firefox ZIP from this fork's release, or build it locally.
 2. Extract the ZIP to a directory you will keep.
@@ -34,7 +44,7 @@ Firefox continues to support Manifest V2 alongside Manifest V3. The persistent b
 4. Choose **Load Temporary Add-on**, then select manifest.json inside the extracted directory. When building locally, choose dist/firefox/manifest.json.
 5. Open MarkMind from the extensions menu and select your language and provider.
 
-Temporary installation lasts until Firefox restarts. After a restart, load the same manifest again. This is a testing / development installation, not a permanent signed installation. Permanent installation on standard Firefox requires submission to Mozilla for signing; this fork has not completed that process. See Mozilla's [temporary installation](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/) and [signing documentation](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/).
+Temporary installation lasts until Firefox restarts. After a restart, load the same manifest again. The unsigned ZIP and unpacked local build are for testing / development; for ordinary use, install the signed release above. See Mozilla's [temporary installation documentation](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
 
 ### Chromium / Edge: load the build
 
@@ -118,6 +128,8 @@ Build outputs:
 - dist/firefox: unpacked Firefox extension, including manifest.json.
 - artifacts/markmind-firefox-2.1.0.zip: unsigned Firefox package.
 
+The signed XPI is a separate [release attachment](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi), not an output of these local build commands. Building or changing the source does not preserve the release's Mozilla signature; modified packages must be signed again.
+
 For development, npm run dev serves the Chromium extension. npm run build:firefox rebuilds only the Firefox target. A GitHub Actions template is included at tools/github-actions-ci.yml for lint, unit tests, both builds, validation, and packaging. It is not enabled: the publishing credential did not have the workflow scope. To enable it, copy the template to .github/workflows/ci.yml using credentials with workflow access. Its artifact remains unsigned.
 
 ### Real Firefox test
@@ -139,6 +151,8 @@ Remove-Item Env:FIREFOX_AI_DELAY_MS
 ~~~
 
 The CI template does not run this Selenium test; it runs the portable verification and packaging commands above.
+
+To verify a signed release separately, run `node tools/verify-firefox-signature.mjs /path/to/addon.xpi`. It uses Firefox's signature verification, installs into a new isolated profile, and checks that the add-on remains active after restarting Firefox. It never uses your personal browser profile.
 
 ### Validation and dependency notes
 

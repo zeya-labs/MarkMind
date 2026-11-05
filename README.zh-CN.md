@@ -19,14 +19,24 @@
 
 | 浏览器 | 构建目录 | 安装方式 |
 | --- | --- | --- |
-| Firefox 桌面版 140 及以上 | dist/firefox | 临时加载扩展，见下方步骤 |
+| Firefox 桌面版 140 及以上 | Releases 中的签名 XPI | 从文件安装，重启后保留 |
 | Chrome / Chromium / Edge | dist/chromium | 开发者模式，加载已解压扩展 |
 
 Firefox 仍同时支持 Manifest V2 与 Manifest V3。本分支选择持久化后台页，是为了让长时间 AI 请求在关闭弹窗后保持运行。参见 [Mozilla 的扩展平台说明](https://blog.mozilla.org/en/firefox/firefox-manifest-v3-adblockers/)及[后台清单字段文档](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background)。
 
-**此分支尚未在 Mozilla Add-ons 上架，Firefox 包也尚未经过 Mozilla 签名。** 原项目的 Chrome 应用商店页面属于上游项目，不包含本分支的修改。
+**发布页提供经过 Mozilla 签名的 Firefox XPI，通过 GitHub 自行分发；此分支尚未在 Mozilla Add-ons（AMO）公开上架。** 原项目的 Chrome 应用商店页面属于上游项目，不包含本分支的修改。
 
-### Firefox：加载当前未签名版本
+### Firefox：安装签名发布包（推荐）
+
+1. 从 [v2.1.0 发布页](https://github.com/zeya-labs/MarkMind/releases/tag/v2.1.0)下载 [markmind-firefox-2.1.0-signed.xpi](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi)，不要解压 XPI。
+2. 在 Firefox 地址栏打开 about:addons。
+3. 点击齿轮菜单，选择“从文件安装附加组件…”。
+4. 选择签名 XPI，查看 Firefox 的权限提示并确认安装。
+5. 在扩展菜单打开 MarkMind，选择语言和 AI 服务商。
+
+签名版本在重启 Firefox 后仍会保留。通过 Mozilla 签名不等于在 AMO 公开上架。签名只适用于此发布包的原始内容；自行构建或修改代码后，需要重新提交 Mozilla 签名才能永久安装。参见 Mozilla 的[签名说明](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/)。
+
+### Firefox：临时加载未签名开发版本
 
 1. 从本分支的发布附件下载 Firefox ZIP，或自行构建。
 2. 解压 ZIP，并保留解压目录。
@@ -34,7 +44,7 @@ Firefox 仍同时支持 Manifest V2 与 Manifest V3。本分支选择持久化�
 4. 点击“临时载入附加组件”，选择解压目录里的 manifest.json。自行构建时选择 dist/firefox/manifest.json。
 5. 在扩展菜单打开 MarkMind，选择语言和 AI 服务商。
 
-临时扩展在重启 Firefox 后会卸载；需要重新选择同一个 manifest.json。此方式用于测试和开发，不是永久安装。标准版 Firefox 永久安装需要向 Mozilla 提交签名，本分支尚未完成该流程。参见 Mozilla 的[临时安装说明](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)与[签名说明](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/)。
+临时扩展在重启 Firefox 后会卸载，需要重新选择同一个 manifest.json。未签名 ZIP 与本地解压构建仅用于测试和开发；日常使用请安装上面的签名发布包。参见 Mozilla 的[临时安装说明](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)。
 
 ### Chrome / Edge：加载构建目录
 
@@ -119,6 +129,8 @@ npm run package:firefox
 - dist/firefox：可临时加载到 Firefox 的解压扩展，包含 manifest.json。
 - artifacts/markmind-firefox-2.1.0.zip：未签名的 Firefox 包。
 
+签名 XPI 是另行提供的[发布附件](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi)，不是上述本地构建命令的产物。重新构建或修改源码不会保留发布包的 Mozilla 签名；修改后的包必须重新签名。
+
 npm run dev 用于 Chromium 开发；npm run build:firefox 只重建 Firefox 版本。tools/github-actions-ci.yml 提供自动检查、测试、双浏览器构建、校验和打包的 GitHub Actions 模板。当前发布凭据缺少 workflow 权限，因此模板尚未启用；如需启用，请使用具有工作流权限的凭据将其复制到 .github/workflows/ci.yml。自动打包的产物仍未签名。
 
 ### 真实 Firefox 测试
@@ -140,6 +152,8 @@ Remove-Item Env:FIREFOX_AI_DELAY_MS
 ~~~
 
 CI 模板不运行此 Selenium 测试，只运行前述可移植的校验与打包步骤。
+
+签名发布包可另行运行 `node tools/verify-firefox-signature.mjs /path/to/addon.xpi` 验证。脚本使用 Firefox 自身校验签名，在新建的独立配置中安装，并检查重启后扩展是否仍然启用；不会使用你的个人浏览器配置。
 
 ### 校验与依赖说明
 
