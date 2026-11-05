@@ -3,6 +3,17 @@ import { type ServiceConfig } from '../types/services';
 export type { ServiceConfig };
 
 export const SERVICES: Record<string, ServiceConfig> = {
+  deepseek: {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    label: 'DeepSeek API Key',
+    storageKey: 'deepseekApiKey',
+    placeholder: 'Enter your DeepSeek API key',
+    helpLink: 'https://platform.deepseek.com/api_keys',
+    helpLinkText: 'DeepSeek Platform',
+    freeTierNote: 'DeepSeek API usage is billed separately. Check your account balance and current pricing.',
+    validateKey: (key: string) => key.trim().length >= 20,
+  },
   google: {
     id: 'google',
     name: 'Google',
@@ -58,7 +69,7 @@ export const SERVICES: Record<string, ServiceConfig> = {
   },
 };
 
-export const DEFAULT_SERVICE_ID = 'google';
+export const DEFAULT_SERVICE_ID = 'deepseek';
 export const SELECTED_SERVICE_STORAGE_KEY = 'selectedService';
 export const SELECTED_MODEL_STORAGE_KEY = 'selectedModel';
 export const MODELS_CACHE_KEY_PREFIX = 'cachedModels_';

@@ -3,7 +3,7 @@
   "name": "__MSG_extensionName__",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "icons": {
     "128": "assets/icons/icon128.png"
   },
@@ -25,6 +25,7 @@
     "alarms"
   ],
   "host_permissions": [
+    "https://api.deepseek.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://api.openai.com/*",
     "https://api.anthropic.com/*",

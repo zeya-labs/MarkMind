@@ -1,4 +1,9 @@
 const messages: Record<string, string> = {
+  "No API key found for DeepSeek": "未找到 DeepSeek 的 API 密钥",
+  "DeepSeek balance is insufficient. Add credit in the DeepSeek platform and try again.": "DeepSeek 余额不足，请在 DeepSeek 开放平台充值后重试。",
+  "DeepSeek returned an empty response. Please try again.": "DeepSeek 返回了空回复，请重试。",
+  "DeepSeek returned an unreadable response. Please try again.": "无法解析 DeepSeek 的回复，请重试。",
+  "Unexpected response from DeepSeek models endpoint": "DeepSeek 模型接口返回了非预期内容",
   "Failed to organize bookmarks.": "整理书签失败。",
   "Please select an AI provider first": "请先选择 AI 服务商",
   "Please select a model in Settings first": "请先在设置中选择模型",

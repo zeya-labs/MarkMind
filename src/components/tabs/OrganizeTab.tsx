@@ -16,7 +16,12 @@ const getDestinationLabel = (session: OrganizeSession): string | undefined => {
   return destination ? formatDestinationLabel(destination.path) : undefined;
 };
 
-const OrganizeTab = () => {
+interface OrganizeTabProps {
+  hasConfiguredProvider: boolean;
+  onOpenSettings: () => void;
+}
+
+const OrganizeTab = ({ hasConfiguredProvider, onOpenSettings }: OrganizeTabProps) => {
   const { t, language } = useI18n();
   const {
     session,
@@ -55,7 +60,7 @@ const OrganizeTab = () => {
           onSelectAll={handleSelectAll}
           onDeselectAll={handleDeselectAll}
           onSelectDestination={handleSelectDestination}
-          onStartPlanning={handleStartOrganizing}
+          onStartPlanning={hasConfiguredProvider ? handleStartOrganizing : onOpenSettings}
           onRemoveDuplicates={handleRemoveDuplicates}
         />
       );
@@ -93,7 +98,7 @@ const OrganizeTab = () => {
           onDeselectAll={handleDeselectAllAssignments}
           onToggleAssignment={handleToggleAssignment}
           onApplyMoves={handleApplyMoves}
-          onReOrganize={handleReOrganize}
+          onReOrganize={hasConfiguredProvider ? handleReOrganize : onOpenSettings}
           onReset={handleReset}
         />
       );

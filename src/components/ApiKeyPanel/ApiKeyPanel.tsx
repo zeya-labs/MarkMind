@@ -17,7 +17,7 @@ import {
   MoonIcon,
 } from '../icons/Icons';
 import Footer from '../Footer/Footer';
-import { AI_STUDIO_URL } from '../../config/onboarding';
+import { DEFAULT_SERVICE_ID, SERVICES } from '../../config/services';
 import './ApiKeyPanel.css';
 
 interface ApiKeyPanelProps {
@@ -73,9 +73,10 @@ const ApiKeyPanel = ({
     setShowSetupGuide(false);
   }, []);
 
-  const handleOpenAIStudio = useCallback((): void => {
-    chrome.tabs.create({ url: AI_STUDIO_URL });
-  }, []);
+  const guideProvider = currentService.id ? currentService : SERVICES[DEFAULT_SERVICE_ID];
+  const handleOpenProvider = useCallback((): void => {
+    if (guideProvider.helpLink) chrome.tabs.create({ url: guideProvider.helpLink });
+  }, [guideProvider]);
 
   if (!isOpen) return null;
 
@@ -88,7 +89,8 @@ const ApiKeyPanel = ({
     return (
       <SetupGuide
         onClose={handleCloseSetupGuide}
-        onOpenAIStudio={handleOpenAIStudio}
+        onOpenProvider={handleOpenProvider}
+        provider={guideProvider}
       />
     );
   }
@@ -101,6 +103,11 @@ const ApiKeyPanel = ({
           {showWelcomeMessage ? (
             <div className="header-welcome">
               <div className="header-left">
+                {canClose && (
+                  <Button variant="icon" onClick={handlePanelClose} title={t('Back to Home')}>
+                    <ArrowLeftIcon />
+                  </Button>
+                )}
                 <img
                   src="/assets/icons/icon48.png"
                   alt="MarkMind"
@@ -156,8 +163,7 @@ const ApiKeyPanel = ({
           {showWelcomeMessage && (
             <div className="welcome-message">
               <p className="welcome-headline">{t("You mark. We mind.")}</p>
-              <p className="welcome-subtext">{t("Connect your AI to begin.")}</p>
-              <p className="welcome-subtext">{t("Your only setup for the magic to happen.")}</p>
+              <p className="welcome-subtext">{t('You can configure AI later in Settings.')}</p>
             </div>
           )}
 
@@ -173,7 +179,7 @@ const ApiKeyPanel = ({
               <button
                 type="button"
                 className="api-key-card-info-trigger"
-                aria-label={t('About the free tier')}
+                aria-label={t('About API usage and pricing')}
                 aria-describedby="free-tier-tooltip"
                 onMouseEnter={() => setIsTooltipVisible(true)}
                 onMouseLeave={() => setIsTooltipVisible(false)}
@@ -187,6 +193,8 @@ const ApiKeyPanel = ({
                     role="tooltip"
                     className="api-key-card-info-tooltip"
                   >
+                    <strong>{t('API usage & pricing')}</strong>
+                    <br />
                     {t(currentService.freeTierNote)}
                   </div>
                 )}

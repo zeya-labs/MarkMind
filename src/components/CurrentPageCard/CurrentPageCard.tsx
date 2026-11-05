@@ -20,6 +20,7 @@ interface CurrentPageCardProps {
   onOrganize: () => void;
   onAccept: () => void;
   onDecline: () => void;
+  organizeLabel?: string;
 }
 
 const CurrentPageCard = ({
@@ -34,6 +35,7 @@ const CurrentPageCard = ({
   onOrganize,
   onAccept,
   onDecline,
+  organizeLabel,
 }: CurrentPageCardProps) => {
   const { t } = useI18n();
   const shouldShowH1 = currentPage?.h1
@@ -146,6 +148,8 @@ const CurrentPageCard = ({
                   <SpinnerIcon />
                   {statusMessage || t('Analyzing...')}
                 </>
+              ) : organizeLabel ? (
+                organizeLabel
               ) : isAlreadyBookmarked ? (
                 t('Re-organize')
               ) : (

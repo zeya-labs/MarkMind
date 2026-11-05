@@ -13,3 +13,4 @@ export const ONBOARDING_TOOLTIPS_PENDING_KEY = 'showOnboardingTooltips';
 export const ONBOARDING_TOOLTIPS_SEEN_KEY = 'onboardingTooltipsSeen';
 
 export const AI_STUDIO_URL = 'https://aistudio.google.com/apikey';
+export const DEEPSEEK_API_KEYS_URL = 'https://platform.deepseek.com/api_keys';

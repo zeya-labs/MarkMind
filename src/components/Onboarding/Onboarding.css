@@ -224,3 +224,11 @@
 .onboarding-cta {
   padding-top: var(--spacing-md);
 }
+
+.onboarding-alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-xl);
+  text-align: center;
+}

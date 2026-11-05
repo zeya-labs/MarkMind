@@ -98,7 +98,65 @@ try {
   await screenshot('firefox-onboarding-zh.png');
   console.log('PASS automatic Chinese language detection and initial onboarding');
 
+  await clickText('暂时跳过');
+  await waitText('尚未配置 AI');
+  assert.equal(await driver.findElements(By.css('.api-key-panel.active')).then(items => items.length), 0);
+  let stored = await callExtension('return await browser.storage.local.get(null);');
+  assert.equal(stored.onboardingComplete, true);
+  assert.equal(stored.deepseekApiKey, undefined);
+  await driver.navigate().refresh();
+  await waitText('尚未配置 AI');
+  await screenshot('firefox-skipped-home-zh.png');
+  await driver.findElement(By.css('button[title="设置"]')).click();
+  await waitText('DeepSeek API 密钥');
+  await driver.findElement(By.css('button[title="返回首页"]')).click();
+  await waitText('尚未配置 AI');
+  assert.equal(await driver.findElements(By.css('.api-key-panel.active')).then(items => items.length), 0);
+  assert.equal(requests.length, 0, 'Skipping and opening settings must not call AI');
+  console.log('PASS skip persists, unconfigured home is usable, default DeepSeek settings can close');
+
+  // Model validation is mocked only in this disposable popup. No live API key
+  // or shipping code interception; provider request/JSON contracts have unit tests.
+  await callExtension('await browser.storage.local.clear();');
+  await driver.navigate().refresh();
+  await clickText('开始使用');
+  await waitText('DeepSeek');
+  await clickText('查看设置步骤');
+  await waitText('连接 DeepSeek');
+  await screenshot('firefox-deepseek-guide-zh.png');
+  await driver.executeScript(`
+    const originalFetch = window.fetch.bind(window);
+    window.deepseekModelRequests = [];
+    window.fetch = (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (url.startsWith('https://api.deepseek.com/')) {
+        window.deepseekModelRequests.push({ url, authorization: init?.headers?.Authorization });
+        if (url !== 'https://api.deepseek.com/models') throw new Error('Unexpected live AI request');
+        return Promise.resolve(new Response(JSON.stringify({ data: [
+          { id: 'deepseek-fixture-flash', name: 'DeepSeek fixture' }
+        ] }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
+      return originalFetch(input, init);
+    };
+  `);
+  const fakeKey = 'sk-fixture-deepseek-not-a-real-key';
+  await driver.findElement(By.css('.onboarding-input-section input')).sendKeys(fakeKey);
+  await clickText('连接 DeepSeek');
+  await waitText('设置完成！');
+  stored = await callExtension('return await browser.storage.local.get(null);');
+  assert.equal(stored.selectedService, 'deepseek');
+  assert.equal(stored.selectedModel, 'deepseek-fixture-flash');
+  assert.equal(stored.deepseekApiKey, fakeKey);
+  assert.deepEqual(await driver.executeScript('return window.deepseekModelRequests;'), [
+    { url: 'https://api.deepseek.com/models', authorization: `Bearer ${fakeKey}` },
+  ]);
+  await clickText('开始整理');
+  await waitText('首页');
+  assert(!(await driver.findElement(By.css('body')).getText()).includes('尚未配置 AI'));
+  console.log('PASS DeepSeek onboarding validates models and persists provider/key/model');
+
   const fixtures = await callExtension(`
+    await browser.storage.local.clear();
     const roots = (await browser.bookmarks.getTree())[0].children;
     for (const root of roots) {
       for (const child of root.children ?? []) await browser.bookmarks.removeTree(child.id);
@@ -112,8 +170,6 @@ try {
     await browser.bookmarks.create({ parentId: source.id, type: 'separator' });
     await browser.storage.local.set({
       onboardingComplete: true, onboardingTooltipsSeen: true,
-      customBaseUrl: arguments[0], selectedService: 'custom', selectedModel: 'fixture-model',
-      cachedModels_custom: { models: [{ id: 'fixture-model', name: 'Fixture model' }], timestamp: Date.now() },
     });
     return { source, destination, items };
   `, baseUrl);
@@ -130,6 +186,30 @@ try {
   await driver.wait(async () => (await session()).destinationFolderId === fixtures.destination.id, 10000);
   await screenshot('firefox-scan-zh.png');
   console.log('PASS native bookmark scan, GUID roots, separator and blank title handling');
+
+  await clickText('整理所选书签（3）');
+  await waitText('DeepSeek API 密钥');
+  assert.equal(requests.length, 0, 'Unconfigured bulk action should open Settings');
+  await driver.findElement(By.css('button[title="返回首页"]')).click();
+  await waitText('整理所选书签（3）');
+  assert.equal((await session()).destinationFolderId, fixtures.destination.id);
+  assert.equal((await session()).status, 'selecting');
+  console.log('PASS scan works without a key; settings round-trip preserves selection/destination');
+
+  await callExtension(`
+    await browser.storage.local.set({
+      customBaseUrl: arguments[0], selectedService: 'custom', selectedModel: 'fixture-model',
+      selectedModel_custom: 'fixture-model',
+      cachedModels_custom: { models: [{ id: 'fixture-model', name: 'Fixture model' }], fetchedAt: Date.now() },
+    });
+  `, baseUrl);
+  await driver.findElement(By.css('button[title="设置"]')).click();
+  await waitText('自定义');
+  await driver.findElement(By.css('button[title="返回"]')).click();
+  await waitText('整理所选书签（3）');
+  stored = await callExtension('return await browser.storage.local.get(["selectedService", "selectedModel"]);');
+  assert.equal(stored.selectedService, 'custom', 'Existing provider must not be overwritten by new default');
+  assert.equal(stored.selectedModel, 'fixture-model');
 
   // Close the popup while AI is in flight: the event page must finish the run.
   responseDelay = Number(process.env.FIREFOX_AI_DELAY_MS ?? 1200);
@@ -167,6 +247,8 @@ try {
     passed: true, browserVersion: capabilities.get('browserVersion'),
     bookmarks: 3, aiRequests: requests.length, aiDelayMs: responseDelay,
     checks: ['temporary install', 'automatic Chinese', 'native bookmarks', 'destination selection',
+      'skip onboarding and persistence', 'unconfigured home and closable settings', 'DeepSeek default provider',
+      'DeepSeek key and model validation', 'unconfigured scan', 'selection survives settings', 'existing provider preserved',
       'background AI with popup closed', 'Chinese AI prompt', 'review before apply',
       'scoped moves', 'existing titles preserved', 'English switch and persistence'],
   }, null, 2));

@@ -1,4 +1,5 @@
 export { callGemini, fetchGeminiModels } from './gemini';
+export { callDeepSeek, fetchDeepSeekModels } from './deepseek';
 export { callOpenAI, fetchOpenAIModels } from './openai';
 export { callAnthropic, fetchAnthropicModels } from './anthropic';
 export { callOpenRouter, fetchOpenRouterModels } from './openRouter';

@@ -5,7 +5,6 @@ import { type StatusType } from '../../types/common';
 import {
   type ApiKeyPanelStatusMessage,
   type UseApiKeyPanelProps,
-  AUTO_CLOSE_DELAY_MS,
 } from './types';
 import {
   createHandleApiKeySave,
@@ -26,8 +25,7 @@ export const useApiKeyPanel = ({ isOpen, canClose, onClose }: UseApiKeyPanelProp
     type: null,
     showGoToApp: false,
   });
-  const [canClosePanel, setCanClosePanel] = useState(canClose);
-  const autoCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canClosePanel = canClose;
   const [buttonError, setButtonError] = useState('');
   const buttonErrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [modelsRefreshTrigger, setModelsRefreshTrigger] = useState(0);
@@ -65,19 +63,7 @@ export const useApiKeyPanel = ({ isOpen, canClose, onClose }: UseApiKeyPanelProp
 
   const handleModelChange = useCallback((modelId: string): void => {
     setSelectedModel(modelId);
-
-    // Auto-close after save only for first-time users to guide them to main app
-    if (modelId && !canClosePanel) {
-      setCanClosePanel(true);
-      if (autoCloseTimeoutRef.current) {
-        clearTimeout(autoCloseTimeoutRef.current);
-      }
-      autoCloseTimeoutRef.current = setTimeout(() => {
-        handlePanelClose();
-        autoCloseTimeoutRef.current = null;
-      }, AUTO_CLOSE_DELAY_MS);
-    }
-  }, [canClosePanel, handlePanelClose]);
+  }, []);
 
   const showButtonError = useCallback((message: string): void => {
     if (buttonErrorTimeoutRef.current) {
@@ -168,11 +154,7 @@ export const useApiKeyPanel = ({ isOpen, canClose, onClose }: UseApiKeyPanelProp
   }, [clearStatus, onClose]);
 
   useEffect(() => {
-    const timeoutRef = autoCloseTimeoutRef;
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
       if (buttonErrorTimeoutRef.current) {
         clearTimeout(buttonErrorTimeoutRef.current);
       }
@@ -194,10 +176,6 @@ export const useApiKeyPanel = ({ isOpen, canClose, onClose }: UseApiKeyPanelProp
       setBaseUrlInput('');
     }
   }, [currentService]);
-
-  useEffect(() => {
-    setCanClosePanel(canClose);
-  }, [canClose]);
 
   return {
     currentService,

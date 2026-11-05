@@ -47,8 +47,9 @@ const Onboarding = ({
     handleApiKeyInputChange,
     handleApiKeyInputKeyDown,
     handleApiKeySubmit,
-    handleOpenAIStudio,
+    handleOpenDeepSeek,
     handleEscape,
+    handleSkip,
   } = useOnboarding({ onComplete, onEscapeToApiKeyPanel, startAtStep });
 
   if (!isOpen) return null;
@@ -66,7 +67,7 @@ const Onboarding = ({
 
   const renderBackButton = () => (
     <div className="onboarding-back-row">
-      <Button variant="icon" onClick={handleBack} title={t("Go back")}>
+      <Button variant="icon" onClick={handleBack} disabled={isValidating} title={t("Go back")}>
         <ArrowLeftIcon />
       </Button>
     </div>
@@ -105,8 +106,9 @@ const Onboarding = ({
     <div className="onboarding-step">
       {renderBackButton()}
       <h2 className="onboarding-explain-title">{t("How does it work?")}</h2>
-      <p className="onboarding-explain-text">{t("MarkMind uses AI to sort your bookmarks into folders. Gemini offers a free tier with usage limits; availability and pricing depend on your provider.")}</p>
+      <p className="onboarding-explain-text">{t("MarkMind uses AI to sort your bookmarks into folders. This guide connects DeepSeek; you can also choose another AI provider.")}</p>
       <p className="onboarding-explain-text">{t("To connect, you need an API key from your AI provider. It lets MarkMind send requests directly to that service.")}</p>
+      <p className="onboarding-explain-text">{t("DeepSeek API usage is billed separately. Check your account balance and current pricing.")}</p>
       <div className="onboarding-reassurances">
         <div className="onboarding-reassurance-item">
           <CheckCircleIcon width={16} height={16} />
@@ -124,11 +126,6 @@ const Onboarding = ({
       <div className="onboarding-cta">
         <Button variant="primary" fullWidth onClick={handleNext}>{t("Show me how")}</Button>
       </div>
-      <Button
-        variant="unstyled"
-        className="onboarding-escape-link"
-        onClick={handleEscape}
-      >{t("Already have an API key from another provider?")}</Button>
     </div>
   );
 
@@ -140,20 +137,20 @@ const Onboarding = ({
       <div className="step-list">
         <div className="step-list-row">
           <span className="step-list-number">1</span>
-          <span className="step-list-text">{t("Open Google AI Studio")}<span className="onboarding-step-link">
+          <span className="step-list-text">{t("Open the DeepSeek platform")}<span className="onboarding-step-link">
               {' '}
-              <Button variant="ghost" compact onClick={handleOpenAIStudio}>
+              <Button variant="ghost" compact onClick={handleOpenDeepSeek}>
                 <ExternalLinkIcon width={10} height={10} />{t("Open")}</Button>
             </span>
           </span>
         </div>
         <div className="step-list-row">
           <span className="step-list-number">2</span>
-          <span className="step-list-text">{t("Sign in with your Google account")}</span>
+          <span className="step-list-text">{t("Sign in and create a DeepSeek API key")}</span>
         </div>
         <div className="step-list-row">
           <span className="step-list-number">3</span>
-          <span className="step-list-text">{t("Click \"Create API Key\"")}</span>
+          <span className="step-list-text">{t("Check your account balance and API pricing")}</span>
         </div>
         <div className="step-list-row">
           <span className="step-list-number">4</span>
@@ -166,15 +163,12 @@ const Onboarding = ({
           aria-label={t('API Key')}
           aria-invalid={!!errorMessage}
           aria-describedby={errorMessage ? 'onboarding-key-error' : undefined}
-          placeholder={t("Paste your key here")}
+          placeholder={t("Enter your DeepSeek API key")}
           value={apiKeyInput}
           onChange={handleApiKeyInputChange}
           onKeyDown={handleApiKeyInputKeyDown}
           disabled={isValidating}
         />
-        {errorMessage && (
-          <p id="onboarding-key-error" role="alert" className="onboarding-error-message">{t(errorMessage)}</p>
-        )}
         {isValidating && (
           <p className="onboarding-validating-text">
             <SpinnerIcon width={12} height={12} />{t("Connecting...")}</p>
@@ -185,8 +179,9 @@ const Onboarding = ({
           onClick={handleApiKeySubmit}
           disabled={isValidating}
         >
-          {isValidating ? t("Connecting...") : t("Connect to Google AI")}
+          {isValidating ? t("Connecting...") : t("Connect to DeepSeek")}
         </Button>
+        <p className="onboarding-guide-subtitle">{t("After validation, MarkMind selects an available model. You can change it in Settings.")}</p>
       </div>
     </div>
   );
@@ -245,6 +240,23 @@ const Onboarding = ({
         <div className="api-key-panel-body">
           {renderProgressDots()}
           {renderCurrentStep()}
+          {errorMessage && (
+            <p id="onboarding-key-error" role="alert" className="onboarding-error-message">{t(errorMessage)}</p>
+          )}
+          {currentStep !== 'success' && (
+            <div className="onboarding-alternatives">
+              <Button
+                variant="unstyled"
+                className="onboarding-escape-link"
+                onClick={handleEscape}
+                disabled={isValidating}
+              >{t("Use another AI provider")}</Button>
+              <Button variant="ghost" fullWidth onClick={handleSkip} disabled={isValidating}>
+                {t("Skip for now")}
+              </Button>
+              <p className="onboarding-guide-subtitle">{t("You can configure AI later in Settings.")}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

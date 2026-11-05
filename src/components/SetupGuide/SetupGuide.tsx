@@ -8,14 +8,28 @@ import {
   ExternalLinkIcon,
 } from '../icons/Icons';
 import './SetupGuide.css';
+import { type ServiceConfig } from '../../config/services';
 
 interface SetupGuideProps {
   onClose: () => void;
-  onOpenAIStudio: () => void;
+  onOpenProvider: () => void;
+  provider: ServiceConfig;
 }
 
-const SetupGuide = ({ onClose, onOpenAIStudio }: SetupGuideProps) => {
+const SetupGuide = ({ onClose, onOpenProvider, provider }: SetupGuideProps) => {
   const { t } = useI18n();
+  const isCustom = !!provider.baseUrlStorageKey;
+  const steps = isCustom ? [
+    'Start your OpenAI-compatible server',
+    'Enter its base URL in Settings',
+    'Add an API key if your server requires one',
+    'Save the connection and select a model',
+  ] : [
+    'Open your provider’s API key page',
+    'Create an account or sign in',
+    'Create an API key',
+    'Paste the key in Settings, save it, and select a model',
+  ];
   return (
   <div className="api-key-panel active">
     <div className="api-key-panel-content">
@@ -33,8 +47,11 @@ const SetupGuide = ({ onClose, onOpenAIStudio }: SetupGuideProps) => {
       <div className="api-key-panel-body">
         <div className="setup-guide-section">
           <h3 className="setup-guide-heading">{t("How does it work?")}</h3>
-          <p className="setup-guide-text">{t("MarkMind uses AI to sort your bookmarks into folders. Gemini offers a free tier with usage limits; availability and pricing depend on your provider.")}</p>
-          <p className="setup-guide-text">{t("To connect, you need an API key from your AI provider. It lets MarkMind send requests directly to that service.")}</p>
+          <p className="setup-guide-text">{t('Choose an AI provider to organize bookmarks. DeepSeek is selected by default, and you can switch providers in Settings.')}</p>
+          <p className="setup-guide-text">{t(isCustom
+            ? 'For a local or custom server, enter the base URL and an API key only if required.'
+            : 'To connect, you need an API key from your AI provider. It lets MarkMind send requests directly to that service.')}</p>
+          <p className="setup-guide-text">{t('You can configure AI later in Settings.')}</p>
         </div>
 
         <div className="info-card">
@@ -59,31 +76,26 @@ const SetupGuide = ({ onClose, onOpenAIStudio }: SetupGuideProps) => {
               <KeyIcon />
             </div>
             <div className="api-key-titles">
-              <h3 className="api-key-title">{t("How to get your API key")}</h3>
+              <h3 className="api-key-title">{t(isCustom ? 'Connect a local or custom provider' : 'How to get your API key')}</h3>
               <p className="api-key-subtitle">{t("Follow these 4 simple steps")}</p>
             </div>
           </div>
 
           <div className="step-list">
-            <div className="step-list-row">
-              <span className="step-list-number">1</span>
-              <span className="step-list-text">{t("Open Google AI Studio")}{' '}
-                <Button variant="ghost" compact onClick={onOpenAIStudio}>
-                  <ExternalLinkIcon width={10} height={10} />{t("Open")}</Button>
-              </span>
-            </div>
-            <div className="step-list-row">
-              <span className="step-list-number">2</span>
-              <span className="step-list-text">{t("Sign in with your Google account")}</span>
-            </div>
-            <div className="step-list-row">
-              <span className="step-list-number">3</span>
-              <span className="step-list-text">{t("Click \"Create API Key\"")}</span>
-            </div>
-            <div className="step-list-row">
-              <span className="step-list-number">4</span>
-              <span className="step-list-text">{t("Copy the key and paste it in Settings")}</span>
-            </div>
+            {steps.map((step, index) => (
+              <div className="step-list-row" key={step}>
+                <span className="step-list-number">{index + 1}</span>
+                <span className="step-list-text">
+                  {t(step)}
+                  {index === 0 && provider.helpLink && (
+                    <Button variant="ghost" compact onClick={onOpenProvider}>
+                      <ExternalLinkIcon width={10} height={10} />
+                      {t('Open {provider}', { provider: provider.name })}
+                    </Button>
+                  )}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 

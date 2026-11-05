@@ -1,8 +1,8 @@
 import { SERVICES } from '../../config/services';
 import { type ModelOption } from '../../types/services';
 import {
-  callGemini, callOpenAI, callAnthropic, callOpenRouter, callCustom,
-  fetchGeminiModels, fetchOpenAIModels, fetchAnthropicModels, fetchOpenRouterModels, fetchCustomModels,
+  callGemini, callDeepSeek, callOpenAI, callAnthropic, callOpenRouter, callCustom,
+  fetchGeminiModels, fetchDeepSeekModels, fetchOpenAIModels, fetchAnthropicModels, fetchOpenRouterModels, fetchCustomModels,
 } from './providers';
 
 const getCustomBaseUrl = async (): Promise<string> => {
@@ -20,6 +20,8 @@ export const fetchModelsForProvider = async (
   customBaseUrl?: string
 ): Promise<ModelOption[]> => {
   switch (serviceId) {
+    case 'deepseek':
+      return fetchDeepSeekModels(apiKey);
     case 'google':
       return fetchGeminiModels(apiKey);
     case 'openai':
@@ -64,6 +66,8 @@ export const callProvider = async (
   cancelSignal?: AbortSignal
 ): Promise<string> => {
   switch (serviceId) {
+    case 'deepseek':
+      return callDeepSeek(apiKey, systemPrompt, userPrompt, model, maxTokens, bookmarkCount, expectJson, cancelSignal);
     case 'google':
       return callGemini(apiKey, systemPrompt, userPrompt, model, maxTokens, bookmarkCount, cancelSignal);
     case 'openai':

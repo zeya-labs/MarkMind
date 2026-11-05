@@ -9,13 +9,14 @@ import {
   getServiceCredentialKeys,
   isServiceConfigured,
 } from '../../config/services';
-import { setSelectedServiceId, setSelectedModelId } from '../../services/selectedState';
+import { getSelectedServiceId, setSelectedServiceId, setSelectedModelId } from '../../services/selectedState';
 import { fetchModelsForProvider } from '../../services/ai/providerUtils';
 import { type ModelOption } from '../../types/services';
 import { SpinnerIcon, RefreshIcon } from '../icons/Icons';
 import Dropdown from '../Dropdown/Dropdown';
 import Button from '../Button/Button';
 import './ServiceSelector.css';
+import { resolveInitialServiceId } from './initialService';
 
 const getPerProviderModelKey = (serviceId: string): string =>
   `${SELECTED_MODEL_STORAGE_KEY}_${serviceId}`;
@@ -41,6 +42,7 @@ const ServiceSelector = ({
   const [currentServiceId, setCurrentServiceId] = useState<string>('');
   const [currentModelId, setCurrentModelId] = useState<string>('');
   const [availableModels, setAvailableModels] = useState<ModelOption[]>([]);
+  const activeProviderRef = useRef('');
   const availableModelsRef = useRef(availableModels);
   availableModelsRef.current = availableModels;
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -51,19 +53,22 @@ const ServiceSelector = ({
     if (!service) return [];
 
     const storageResult = await chrome.storage.local.get(getServiceCredentialKeys(service));
+    if (activeProviderRef.current !== serviceId) return [];
     const apiKey = (storageResult[service.storageKey] as string | undefined) ?? '';
 
     if (!isServiceConfigured(service, storageResult)) {
-      setAvailableModels([]);
+      if (activeProviderRef.current === serviceId) setAvailableModels([]);
+      setIsLoadingModels(false);
       return [];
     }
 
     const cacheKey = `${MODELS_CACHE_KEY_PREFIX}${serviceId}`;
     const cachedResult = await chrome.storage.local.get([cacheKey]);
+    if (activeProviderRef.current !== serviceId) return [];
     const cached = cachedResult[cacheKey] as { models: ModelOption[]; fetchedAt: number } | undefined;
 
     if (cached && Date.now() - cached.fetchedAt < MODELS_CACHE_TTL_MS) {
-      setAvailableModels(cached.models);
+      if (activeProviderRef.current === serviceId) setAvailableModels(cached.models);
       return cached.models;
     }
 
@@ -72,7 +77,7 @@ const ServiceSelector = ({
 
     try {
       const models = await fetchModelsForProvider(serviceId, apiKey);
-      setAvailableModels(models);
+      if (activeProviderRef.current === serviceId) setAvailableModels(models);
       await chrome.storage.local.set({
         [cacheKey]: { models, fetchedAt: Date.now() },
       });
@@ -80,18 +85,21 @@ const ServiceSelector = ({
     } catch (error) {
       console.error('Failed to fetch models:', error);
       if (cached?.models) {
-        setAvailableModels(cached.models);
+        if (activeProviderRef.current === serviceId) setAvailableModels(cached.models);
         return cached.models;
       }
-      setModelsError('Could not load models. Check your API key.');
-      setAvailableModels([]);
+      if (activeProviderRef.current === serviceId) {
+        setModelsError('Could not load models. Check your API key.');
+        setAvailableModels([]);
+      }
       return [];
     } finally {
-      setIsLoadingModels(false);
+      if (activeProviderRef.current === serviceId) setIsLoadingModels(false);
     }
   }, []);
 
   const selectModel = useCallback(async (serviceId: string, modelId: string): Promise<void> => {
+    if (activeProviderRef.current !== serviceId || getSelectedServiceId() !== serviceId) return;
     const model = availableModelsRef.current.find((m) => m.id === modelId);
     setCurrentModelId(modelId);
     setSelectedModelId(modelId, model?.maxOutputTokens);
@@ -117,22 +125,35 @@ const ServiceSelector = ({
 
   useEffect(() => {
     if (section === 'model') return;
+    let cancelled = false;
 
     const loadSavedSelectionsFromStorage = async (): Promise<void> => {
-      const result = await chrome.storage.local.get([SELECTED_SERVICE_STORAGE_KEY]);
-      const savedServiceId = result[SELECTED_SERVICE_STORAGE_KEY];
-
-      if (savedServiceId && SERVICES[savedServiceId]) {
-        setCurrentServiceId(savedServiceId);
-        setSelectedServiceId(savedServiceId);
-        onServiceChange(savedServiceId);
-
-        const models = await loadModelsForService(savedServiceId);
-        await restoreOrFirstAvailableModel(savedServiceId, models);
+      const credentialKeys = Object.values(SERVICES).flatMap(getServiceCredentialKeys);
+      const result = await chrome.storage.local.get([SELECTED_SERVICE_STORAGE_KEY, ...credentialKeys]);
+      if (cancelled) return;
+      const serviceId = resolveInitialServiceId(result);
+      activeProviderRef.current = serviceId;
+      setCurrentServiceId(serviceId);
+      setSelectedServiceId(serviceId);
+      onServiceChange(serviceId);
+      if (result[SELECTED_SERVICE_STORAGE_KEY] !== serviceId) {
+        setSelectedModelId('');
+        await chrome.storage.local.set({
+          [SELECTED_SERVICE_STORAGE_KEY]: serviceId,
+          [SELECTED_MODEL_STORAGE_KEY]: '',
+        });
       }
+      // A separate model selector is mounted by ApiKeyPanel for provider-only
+      // views; let that instance load models once the provider is initialized.
+      if (section === 'provider' || cancelled) return;
+      const models = await loadModelsForService(serviceId);
+      if (!cancelled) await restoreOrFirstAvailableModel(serviceId, models);
     };
 
-    loadSavedSelectionsFromStorage();
+    void loadSavedSelectionsFromStorage().catch(error => {
+      console.error('Failed to initialize provider selection:', error);
+    });
+    return () => { cancelled = true; };
   }, [section, onServiceChange, loadModelsForService, restoreOrFirstAvailableModel]);
 
   // For model-only section: load models whenever the external provider changes
@@ -140,11 +161,13 @@ const ServiceSelector = ({
     if (section !== 'model') return;
 
     if (!externalServiceId) {
+      activeProviderRef.current = '';
       setAvailableModels([]);
       setCurrentModelId('');
       return;
     }
 
+    activeProviderRef.current = externalServiceId;
     setCurrentServiceId(externalServiceId);
 
     const loadExternalModels = async (): Promise<void> => {
@@ -170,24 +193,29 @@ const ServiceSelector = ({
   const handleProviderSelect = useCallback(async (serviceId: string): Promise<void> => {
     if (!SERVICES[serviceId]) return;
 
+    activeProviderRef.current = serviceId;
     setCurrentServiceId(serviceId);
     setSelectedServiceId(serviceId);
-    await chrome.storage.local.set({ [SELECTED_SERVICE_STORAGE_KEY]: serviceId });
-    onServiceChange(serviceId);
-
     setCurrentModelId('');
     setSelectedModelId('');
     setAvailableModels([]);
     setModelsError('');
+    setIsLoadingModels(false);
+    await chrome.storage.local.set({
+      [SELECTED_SERVICE_STORAGE_KEY]: serviceId,
+      [SELECTED_MODEL_STORAGE_KEY]: '',
+    });
+    if (activeProviderRef.current !== serviceId || getSelectedServiceId() !== serviceId) return;
+    onServiceChange(serviceId);
     onModelChange('');
 
+    if (section === 'provider') return;
     const models = await loadModelsForService(serviceId);
     await restoreOrFirstAvailableModel(serviceId, models);
-  }, [onServiceChange, onModelChange, loadModelsForService, restoreOrFirstAvailableModel]);
+  }, [section, onServiceChange, onModelChange, loadModelsForService, restoreOrFirstAvailableModel]);
 
   const handleModelSelect = useCallback(async (modelId: string): Promise<void> => {
     if (currentServiceId) {
-      setSelectedServiceId(currentServiceId);
       await selectModel(currentServiceId, modelId);
     }
   }, [currentServiceId, selectModel]);

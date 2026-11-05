@@ -11,6 +11,7 @@ import { ResolvedTheme } from '../../hooks/useTheme';
 
 interface MainContentProps {
   onOpenSettings: () => void;
+  hasConfiguredProvider: boolean;
   theme: ResolvedTheme;
   onToggleTheme: () => void;
   showOnboardingTooltips?: boolean;
@@ -19,6 +20,7 @@ interface MainContentProps {
 
 const MainContent = ({
   onOpenSettings,
+  hasConfiguredProvider,
   theme,
   onToggleTheme,
   showOnboardingTooltips = false,
@@ -50,7 +52,7 @@ const MainContent = ({
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'organize':
-        return <OrganizeTab />;
+        return <OrganizeTab hasConfiguredProvider={hasConfiguredProvider} onOpenSettings={onOpenSettings} />;
       case 'discover':
         return <DiscoverTab />;
       case 'home':
@@ -59,6 +61,7 @@ const MainContent = ({
           <HomeTab
             onTabChange={handleTabChange}
             onOpenSettings={onOpenSettings}
+            hasConfiguredProvider={hasConfiguredProvider}
             showCardTooltip={tooltipStep === 'card'}
             onDismissCardTooltip={handleDismissCardTooltip}
           />

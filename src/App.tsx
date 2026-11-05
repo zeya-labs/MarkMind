@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ApiKeyPanel from './components/ApiKeyPanel/ApiKeyPanel';
 import MainContent from './components/MainContent/MainContent';
 import Onboarding from './components/Onboarding/Onboarding';
-import { SERVICES, getServiceCredentialKeys, isServiceConfigured } from './config/services';
+import { SERVICES, SELECTED_SERVICE_STORAGE_KEY, SELECTED_MODEL_STORAGE_KEY, getServiceCredentialKeys, isServiceConfigured } from './config/services';
 import { initSelectedState } from './services/selectedState';
 import { useTheme } from './hooks/useTheme';
 import {
@@ -15,6 +15,7 @@ const App = () => {
   const { theme, toggleTheme } = useTheme();
   const [showApiKeyPanel, setShowApiKeyPanel] = useState(false);
   const [hasAnyApiKey, setHasAnyApiKey] = useState<boolean | null>(null);
+  const [hasConfiguredProvider, setHasConfiguredProvider] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
   const [showOnboardingTooltips, setShowOnboardingTooltips] = useState(false);
 
@@ -23,30 +24,48 @@ const App = () => {
     const storageKeys = services.flatMap(getServiceCredentialKeys);
     const result = await chrome.storage.local.get([
       ...storageKeys,
+      SELECTED_SERVICE_STORAGE_KEY,
+      SELECTED_MODEL_STORAGE_KEY,
       ONBOARDING_COMPLETE_STORAGE_KEY,
       ONBOARDING_TOOLTIPS_PENDING_KEY,
       ONBOARDING_TOOLTIPS_SEEN_KEY,
     ]);
+    await initSelectedState();
     const hasKey = services.some((service) => isServiceConfigured(service, result));
+    const selectedService = SERVICES[result[SELECTED_SERVICE_STORAGE_KEY]];
+    setHasConfiguredProvider(!!selectedService && isServiceConfigured(selectedService, result)
+      && !!result[SELECTED_MODEL_STORAGE_KEY]);
 
     setHasAnyApiKey(hasKey);
     setOnboardingComplete(!!result[ONBOARDING_COMPLETE_STORAGE_KEY]);
 
-    if (hasKey) {
-      const tooltipsPending = !!result[ONBOARDING_TOOLTIPS_PENDING_KEY];
-      const tooltipsSeen = !!result[ONBOARDING_TOOLTIPS_SEEN_KEY];
-      setShowOnboardingTooltips(tooltipsPending && !tooltipsSeen);
-      setShowApiKeyPanel(false);
-    } else if (result[ONBOARDING_COMPLETE_STORAGE_KEY]) {
-      setShowApiKeyPanel(true);
-    }
-
-    await initSelectedState();
+    const tooltipsPending = !!result[ONBOARDING_TOOLTIPS_PENDING_KEY];
+    const tooltipsSeen = !!result[ONBOARDING_TOOLTIPS_SEEN_KEY];
+    setShowOnboardingTooltips(hasKey && tooltipsPending && !tooltipsSeen);
   }, []);
 
   useEffect(() => {
     checkForExistingApiKeys();
   }, [checkForExistingApiKeys]);
+
+  useEffect(() => {
+    // Settings may finish validating after the user returns to their bookmarks.
+    // Keep the AI entry points ready without requiring another popup restart.
+    // During onboarding, wait for its explicit completion to retain the success step.
+    if (hasAnyApiKey === null || (!hasAnyApiKey && !onboardingComplete)) return;
+    const keys = new Set([
+      ...Object.values(SERVICES).flatMap(getServiceCredentialKeys),
+      SELECTED_SERVICE_STORAGE_KEY,
+      SELECTED_MODEL_STORAGE_KEY,
+    ]);
+    const onStorageChanged = (changes: Record<string, chrome.storage.StorageChange>, area: string): void => {
+      if (area === 'local' && Object.keys(changes).some(key => keys.has(key))) {
+        void checkForExistingApiKeys();
+      }
+    };
+    chrome.storage.onChanged.addListener(onStorageChanged);
+    return () => chrome.storage.onChanged.removeListener(onStorageChanged);
+  }, [checkForExistingApiKeys, hasAnyApiKey, onboardingComplete]);
 
   const handleApiKeyPanelClose = useCallback((): void => {
     setShowApiKeyPanel(false);
@@ -58,6 +77,7 @@ const App = () => {
   }, []);
 
   const handleOnboardingComplete = useCallback((): void => {
+    setShowApiKeyPanel(false);
     checkForExistingApiKeys();
   }, [checkForExistingApiKeys]);
 
@@ -86,14 +106,17 @@ const App = () => {
 
   return (
     <div className="container">
-      {hasAnyApiKey && !showApiKeyPanel && (
-        <MainContent
-          onOpenSettings={handleOpenSettings}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          showOnboardingTooltips={showOnboardingTooltips}
-          onTooltipsDismissed={handleTooltipsDismissed}
-        />
+      {!showOnboarding && (
+        <div hidden={showApiKeyPanel}>
+          <MainContent
+            onOpenSettings={handleOpenSettings}
+            hasConfiguredProvider={hasConfiguredProvider}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            showOnboardingTooltips={showOnboardingTooltips}
+            onTooltipsDismissed={handleTooltipsDismissed}
+          />
+        </div>
       )}
 
       {showOnboarding && (
@@ -108,9 +131,9 @@ const App = () => {
 
       {!showOnboarding && (
         <ApiKeyPanel
-          isOpen={showApiKeyPanel || !hasAnyApiKey}
+          isOpen={showApiKeyPanel}
           showWelcomeMessage={!hasAnyApiKey}
-          canClose={hasAnyApiKey}
+          canClose
           onClose={handleApiKeyPanelClose}
           theme={theme}
           onToggleTheme={toggleTheme}

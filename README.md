@@ -6,7 +6,15 @@
 
 This fork of [migsilva89/MarkMind](https://github.com/migsilva89/MarkMind) adds a Firefox build and an English / Simplified Chinese interface. The original MarkMind project and design are by [migsilva89](https://github.com/migsilva89).
 
-## What changes in 2.1.0
+## 2.2.0 prerelease: DeepSeek and optional setup
+
+- DeepSeek is a built-in provider and the default for new-user onboarding. Its model list and output limits are discovered from the current API rather than an embedded list of model names.
+- The first-run guide connects a DeepSeek API key, or you can choose another provider.
+- **Skip for now** opens the app without requiring a key. Configure a provider and model later in Settings before starting AI analysis.
+- Existing valid provider and model selections are preserved.
+- Chromium / Edge builds are ready to load. The Firefox 2.2.0 ZIP is an **unsigned prerelease**, pending a new Mozilla signature. The older signed Firefox 2.1.0 remains available, but does not include DeepSeek or the new optional setup.
+
+## What changed in 2.1.0
 
 - Separate browser packages: Chromium uses Manifest V3 with a service worker; Firefox uses Manifest V2 with a persistent module background page so long AI requests continue when the popup closes.
 - Firefox bookmark roots, read-only system folders, and separators are handled without treating them as ordinary destination folders.
@@ -19,14 +27,15 @@ This fork of [migsilva89/MarkMind](https://github.com/migsilva89/MarkMind) adds 
 
 | Browser | Build | Installation |
 | --- | --- | --- |
-| Firefox desktop 140 or later | Signed XPI from Releases | Install from file; stays installed after restart |
+| Firefox desktop 140 or later, 2.2.0 prerelease | Unsigned ZIP / dist/firefox | Temporary loading while the new signature is pending |
+| Firefox desktop 140 or later, older stable 2.1.0 | Signed XPI from Releases | Install from file; stays installed after restart; no 2.2.0 features |
 | Chrome / Chromium / Edge | dist/chromium | Developer mode, Load unpacked |
 
 Firefox continues to support Manifest V2 alongside Manifest V3. The persistent background page is intentional: long-running AI requests must remain active while the popup is closed. See [Mozilla's extension platform explanation](https://blog.mozilla.org/en/firefox/firefox-manifest-v3-adblockers/) and the [background manifest reference](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background).
 
-**The release provides a Mozilla-signed Firefox XPI for self-distribution on GitHub. It is not publicly listed on Mozilla Add-ons (AMO).** The upstream Chrome Web Store listing belongs to the original project; it does not install this fork's changes.
+**Firefox 2.2.0 is not signed yet. The Mozilla-signed XPI is the older 2.1.0 stable release, self-distributed on GitHub and not publicly listed on Mozilla Add-ons (AMO).** Its signature does not apply to 2.2.0. The upstream Chrome Web Store listing belongs to the original project; it does not install this fork's changes.
 
-### Firefox: install the signed release (recommended)
+### Firefox: install the older signed 2.1.0 stable release
 
 1. Download [markmind-firefox-2.1.0-signed.xpi](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi) from the [v2.1.0 release](https://github.com/zeya-labs/MarkMind/releases/tag/v2.1.0). Do not extract the XPI.
 2. Open about:addons in Firefox.
@@ -34,17 +43,17 @@ Firefox continues to support Manifest V2 alongside Manifest V3. The persistent b
 4. Select the signed XPI, review Firefox's permission prompt, and confirm installation.
 5. Open MarkMind from the extensions menu and select your language and provider.
 
-The signed installation remains after Firefox restarts. Signing does not mean the extension has a public AMO listing. The signature applies to this exact release package: local builds and changed code need a separate Mozilla signature before permanent installation. See Mozilla's [signing documentation](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/).
+The signed 2.1.0 installation remains after Firefox restarts, but it does not include the 2.2.0 DeepSeek provider or optional onboarding. Signing does not mean the extension has a public AMO listing. The signature applies to this exact 2.1.0 package: 2.2.0, local builds, and changed code need a new Mozilla signature before permanent installation. See Mozilla's [signing documentation](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/).
 
-### Firefox: temporarily load an unsigned development build
+### Firefox: temporarily load the unsigned 2.2.0 prerelease
 
-1. Download the Firefox ZIP from this fork's release, or build it locally.
+1. Download markmind-firefox-2.2.0.zip from this fork's 2.2.0 prerelease, or build it locally.
 2. Extract the ZIP to a directory you will keep.
 3. Open Firefox and visit about:debugging#/runtime/this-firefox.
 4. Choose **Load Temporary Add-on**, then select manifest.json inside the extracted directory. When building locally, choose dist/firefox/manifest.json.
 5. Open MarkMind from the extensions menu and select your language and provider.
 
-Temporary installation lasts until Firefox restarts. After a restart, load the same manifest again. The unsigned ZIP and unpacked local build are for testing / development; for ordinary use, install the signed release above. See Mozilla's [temporary installation documentation](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
+Temporary installation lasts until Firefox restarts. After a restart, load the same manifest again. Use this route to test the 2.2.0 features while signing is pending. If you prefer a permanent signed installation now, the older 2.1.0 release above remains available without those new features. See Mozilla's [temporary installation documentation](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
 
 ### Chromium / Edge: load the build
 
@@ -79,15 +88,18 @@ The language selector is available before provider setup, including on onboardin
 
 ## AI providers
 
-Choose a provider, enter its API key, load the available models, and select a model. API usage and available free quotas are determined by that provider; MarkMind does not include paid AI credits.
+New users are guided to DeepSeek. You can choose another provider or select **Skip for now** and configure AI later in Settings. To run analysis, choose a provider, enter its API key, load the available models, and select a model. API usage and available free quotas are determined by that provider; MarkMind does not include paid AI credits. DeepSeek API usage is billed separately; check your DeepSeek platform balance and current pricing.
 
 | Provider | API key |
 | --- | --- |
+| DeepSeek (new-user default) | [DeepSeek Platform](https://platform.deepseek.com/api_keys) |
 | Google Gemini | [Google AI Studio](https://aistudio.google.com/apikey) |
 | OpenAI | [OpenAI Platform](https://platform.openai.com/api-keys) |
 | Anthropic | [Anthropic Console](https://console.anthropic.com/) |
 | OpenRouter | [OpenRouter](https://openrouter.ai/keys) |
 | Custom OpenAI-compatible endpoint | Depends on the server; local servers can use an empty key |
+
+DeepSeek calls its official https://api.deepseek.com endpoint directly: /models for model discovery and /chat/completions for analysis. No custom base URL is required. Bulk requests use JSON output, while single-page recommendations use a plain folder path. Model IDs come from the API; existing provider choices are not silently migrated to DeepSeek.
 
 ### Ollama and LM Studio
 
@@ -126,9 +138,9 @@ Build outputs:
 
 - dist/chromium: unpacked Chromium / Edge extension.
 - dist/firefox: unpacked Firefox extension, including manifest.json.
-- artifacts/markmind-firefox-2.1.0.zip: unsigned Firefox package.
+- artifacts/markmind-firefox-2.2.0.zip: unsigned Firefox prerelease package.
 
-The signed XPI is a separate [release attachment](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi), not an output of these local build commands. Building or changing the source does not preserve the release's Mozilla signature; modified packages must be signed again.
+The older signed 2.1.0 XPI is a separate [release attachment](https://github.com/zeya-labs/MarkMind/releases/download/v2.1.0/markmind-firefox-2.1.0-signed.xpi), not an output of these local build commands. It does not contain 2.2.0 changes. Building or changing the source does not preserve its Mozilla signature; the 2.2.0 package must be signed again.
 
 For development, npm run dev serves the Chromium extension. npm run build:firefox rebuilds only the Firefox target. A GitHub Actions template is included at tools/github-actions-ci.yml for lint, unit tests, both builds, validation, and packaging. It is not enabled: the publishing credential did not have the workflow scope. To enable it, copy the template to .github/workflows/ci.yml using credentials with workflow access. Its artifact remains unsigned.
 

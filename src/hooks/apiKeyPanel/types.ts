@@ -33,5 +33,3 @@ export interface ApiKeyPanelHandlerDeps {
   checkExistingApiKey: (service: ServiceConfig) => Promise<boolean>;
   onClose?: () => void;
 }
-
-export const AUTO_CLOSE_DELAY_MS = 1500;

@@ -17,8 +17,14 @@ export interface UseOnboardingReturn {
   handleApiKeyInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleApiKeyInputKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   handleApiKeySubmit: () => Promise<void>;
-  handleOpenAIStudio: () => void;
+  handleOpenDeepSeek: () => void;
   handleEscape: () => void;
+  handleSkip: () => Promise<void>;
+}
+
+export interface HandleOnboardingSkipDeps {
+  onComplete: () => void;
+  setErrorMessage: (message: string) => void;
 }
 
 export interface HandleOnboardingKeySaveDeps {

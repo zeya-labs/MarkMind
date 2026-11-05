@@ -5,10 +5,10 @@ import {
   ONBOARDING_STEP_STORAGE_KEY,
   ONBOARDING_COMPLETE_STORAGE_KEY,
   ONBOARDING_TOOLTIPS_PENDING_KEY,
-  AI_STUDIO_URL,
+  DEEPSEEK_API_KEYS_URL,
 } from '../../config/onboarding';
 import { type UseOnboardingProps, type UseOnboardingReturn } from './types';
-import { createHandleOnboardingKeySave } from './handlers';
+import { createHandleOnboardingKeySave, createHandleOnboardingSkip } from './handlers';
 
 export const useOnboarding = ({
   onComplete,
@@ -98,9 +98,14 @@ export const useOnboarding = ({
     [handleApiKeySubmit]
   );
 
-  const handleOpenAIStudio = useCallback((): void => {
-    chrome.tabs.create({ url: AI_STUDIO_URL });
+  const handleOpenDeepSeek = useCallback((): void => {
+    chrome.tabs.create({ url: DEEPSEEK_API_KEYS_URL });
   }, []);
+
+  const handleSkip = useMemo(
+    () => createHandleOnboardingSkip({ onComplete, setErrorMessage }),
+    [onComplete]
+  );
 
   const handleEscape = useCallback(async (): Promise<void> => {
     try {
@@ -142,7 +147,8 @@ export const useOnboarding = ({
     handleApiKeyInputChange,
     handleApiKeyInputKeyDown,
     handleApiKeySubmit,
-    handleOpenAIStudio,
+    handleOpenDeepSeek,
     handleEscape,
+    handleSkip,
   };
 };

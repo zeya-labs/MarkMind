@@ -1,6 +1,6 @@
 # Privacy / 隐私说明
 
-This document describes the Firefox / Chinese language fork at [zeya-labs/MarkMind](https://github.com/zeya-labs/MarkMind), version 2.1.0.
+This document describes the Firefox / Chinese language fork at [zeya-labs/MarkMind](https://github.com/zeya-labs/MarkMind), version 2.2.0. This version adds DeepSeek as a built-in provider and makes initial AI setup optional.
 
 ## English
 
@@ -19,6 +19,12 @@ Scanning and reviewing the local bookmark tree do not by themselves send the ent
 - The API key, if required, is sent directly to the selected provider for authentication. Validation and model-list requests also contact that provider.
 
 MarkMind does not send requests through a server run by this fork. Cloud providers process the data under their own policies, including any retention, review, or model-training terms. URLs can contain private paths or access tokens: review your selected bookmarks before sending them. A local Ollama / LM Studio endpoint keeps inference at the endpoint you configure; a custom remote endpoint is still a third party.
+
+### DeepSeek and optional first-run setup
+
+DeepSeek is the default guide for new users, not a mandatory recipient. You can select another provider or skip setup and configure it later. Skipping does not save a provider key or start AI analysis, and existing valid provider selections are preserved.
+
+When you choose DeepSeek, key validation and model discovery send an authenticated request to https://api.deepseek.com/models. Analysis sends the request data described above directly to https://api.deepseek.com/chat/completions, with the API key used for Bearer authentication. DeepSeek receives and handles those requests under its own terms. The new https://api.deepseek.com/* host permission enables these calls; it does not by itself start analysis or upload the bookmark library. Opening https://platform.deepseek.com/api_keys from the guide is a user-initiated website visit.
 
 ### What is stored locally
 
@@ -58,6 +64,12 @@ MarkMind 读取浏览器书签树，用于显示目录、扫描书签、识别�
 - 如服务商要求鉴权，API 密钥会直接发送给该服务商。验证密钥和加载模型列表也会访问所选服务商。
 
 请求不经过本分支运营的中转服务器。云端服务商会按各自政策处理数据，可能涉及保存、人工审核或模型改进。网址可能包含私人路径或访问令牌，请先检查所选书签。Ollama / LM Studio 会在你配置的端点处理数据；自定义远程端点仍属于外部服务。
+
+### DeepSeek 与可跳过的首次配置
+
+新用户默认引导使用 DeepSeek，但它不是必须选择的数据接收方。你可以选择其他服务商，或先跳过、以后再配置。跳过不会保存服务商密钥，也不会开始 AI 分析；已有的有效服务商选择会被保留。
+
+选择 DeepSeek 后，验证密钥及获取模型会向 https://api.deepseek.com/models 发出带鉴权的请求。分析则将上述请求数据直接发送到 https://api.deepseek.com/chat/completions，并使用 API 密钥进行 Bearer 鉴权。DeepSeek 会按其自身条款接收和处理这些请求。新增的 https://api.deepseek.com/* 主机权限用于启用这些调用，不会仅因获准访问就自动开始分析或上传全部书签。引导中的 https://platform.deepseek.com/api_keys 只会在用户主动点击时打开。
 
 ### 本地保存什么
 

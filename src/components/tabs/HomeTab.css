@@ -1,0 +1,25 @@
+.home-ai-setup {
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.home-ai-setup h2 {
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.home-ai-setup p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+}
+
+.home-ai-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
